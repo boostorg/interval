@@ -176,8 +176,8 @@ interval<T, Policies> pow(const interval<T, Policies>& x, int pwr)
   typename Policies::rounding rnd;
   
   if (interval_lib::user::is_neg(x.upper())) {        // [-2,-1]
-    T yl = pow_dn(-x.upper(), pwr, rnd);
-    T yu = pow_up(-x.lower(), pwr, rnd);
+    T yl = pow_dn(static_cast<T>(-x.upper()), pwr, rnd);
+    T yu = pow_up(static_cast<T>(-x.lower()), pwr, rnd);
     if (pwr & 1)     // [-2,-1]^1
       return I(-yu, -yl, true);
     else             // [-2,-1]^2
@@ -186,7 +186,7 @@ interval<T, Policies> pow(const interval<T, Policies>& x, int pwr)
     if (pwr & 1) {   // [-1,1]^1
       return I(-pow_up(-x.lower(), pwr, rnd), pow_up(x.upper(), pwr, rnd), true);
     } else {         // [-1,1]^2
-      return I(static_cast<T>(0), pow_up(max BOOST_PREVENT_MACRO_SUBSTITUTION(-x.lower(), x.upper()), pwr, rnd), true);
+      return I(static_cast<T>(0), pow_up(max BOOST_PREVENT_MACRO_SUBSTITUTION(static_cast<T>(-x.lower()), x.upper()), pwr, rnd), true);
     }
   } else {                                // [1,2]
     return I(pow_dn(x.lower(), pwr, rnd), pow_up(x.upper(), pwr, rnd), true);
