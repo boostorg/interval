@@ -16,6 +16,8 @@
 
 #if defined(__GNUC__) || defined(__digital__) || defined(__DECCXX)
 
+#include <float.h> // write_rnd() and read_rnd()
+
 namespace boost {
 namespace numeric {
 namespace interval_lib {
@@ -55,7 +57,6 @@ namespace detail {
 #error Dynamic rounding mode not enabled. See cxx man page for details.
 #endif
 
-#   include <float.h> // write_rnd() and read_rnd()
 
     struct alpha_rounding_control
     {
