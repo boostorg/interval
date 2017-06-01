@@ -91,7 +91,7 @@ struct x86_rounding
   {
     _control87(hard2msvc(mode),
       _MCW_EM | _MCW_RC
-#if !defined(_M_AMD64) && !defined(_M_ARM)
+#if !defined(_M_AMD64) && !defined(_M_ARM) && !defined(_M_ARM64)
       // x64 ignores _MCW_PC and _MCW_IC, and the Debug CRT library actually
       // asserts when these are passed to _control87.
       // MSDN says on '_control87' that changing precision (_MCW_PC) or
