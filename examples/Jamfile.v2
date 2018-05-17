@@ -1,0 +1,18 @@
+#  Boost.Interval Library example Jamfile
+#
+#  Copyright (c) 2018 James E. King III
+#
+#  Distributed under the Boost Software License, Version 1.0. (See accompany-
+#  ing file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+import testing ;
+
+test-suite "interval-examples"
+   :    [ run filter.cpp ]
+        [ run findroot_demo.cpp ]
+        [ run horner.cpp ]
+        [ run io.cpp ]
+        [ run newton-raphson.cpp ]
+        [ run rational.cpp ]
+      # [ run transc.cpp ] requires gmp3, mpfr 
+   ;
