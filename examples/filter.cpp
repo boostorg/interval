@@ -12,6 +12,7 @@
  */
 
 #include <boost/numeric/interval.hpp>
+#include <cstring>
 #include <iostream>
 
 namespace dummy {
