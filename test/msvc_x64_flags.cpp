@@ -14,7 +14,7 @@
 int test_main(int, char *[]) {
   boost::numeric::interval<double> i(0.0, 0.0);
   boost::numeric::interval<double> i2 = 60.0 - i;
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_warnings();
 # endif
   return 0;

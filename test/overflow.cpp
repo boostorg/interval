@@ -20,7 +20,7 @@ void test_one(typename I::base_type x, typename I::base_type f) {
   for(int i = 0; i < nb; i++) y *= f;
   for(int i = 0; i < nb; i++) y *= g;
   BOOST_CHECK(in(x, y));
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(nb);
 # endif
 }
@@ -37,7 +37,7 @@ int test_main(int, char *[]) {
   test<boost::numeric::interval<float> >();
   test<boost::numeric::interval<double> >();
   //test<boost::numeric::interval<long double> >();
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_warnings();
 # endif
   return 0;

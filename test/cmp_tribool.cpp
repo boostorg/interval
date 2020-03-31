@@ -31,7 +31,7 @@ static void test_12_34() {
   BOOST_CHECK(!(a == b));
   BOOST_CHECK(a != b);
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -55,7 +55,7 @@ static void test_13_24() {
   BOOST_CHECK(indeterminate(a == b));
   BOOST_CHECK(indeterminate(a != b));
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -79,7 +79,7 @@ static void test_12_23() {
   BOOST_CHECK(indeterminate(a == b));
   BOOST_CHECK(indeterminate(a != b));
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -99,7 +99,7 @@ static void test_12_0() {
   BOOST_CHECK(!(a == b));
   BOOST_CHECK(a != b);
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -119,7 +119,7 @@ static void test_12_1() {
   BOOST_CHECK(indeterminate(a == b));
   BOOST_CHECK(indeterminate(a != b));
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -139,7 +139,7 @@ static void test_12_2() {
   BOOST_CHECK(indeterminate(a == b));
   BOOST_CHECK(indeterminate(a != b));
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -159,7 +159,7 @@ static void test_12_3() {
   BOOST_CHECK(!(a == b));
   BOOST_CHECK(a != b);
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -173,7 +173,7 @@ static void test_12_12() {
   BOOST_CHECK(indeterminate(a == b));
   BOOST_CHECK(indeterminate(a != b));
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -187,7 +187,7 @@ static void test_11_11() {
   BOOST_CHECK(a == b);
   BOOST_CHECK(!(a != b));
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -202,7 +202,7 @@ static void test_11_1() {
   BOOST_CHECK(a == b);
   BOOST_CHECK(!(a != b));
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif

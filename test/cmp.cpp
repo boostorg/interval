@@ -28,7 +28,7 @@ static void test_12_34() {
   BOOST_CHECK(!(a == b));
   BOOST_CHECK(a != b);
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -52,7 +52,7 @@ static void test_13_24() {
   BOOST_C_EXN(a == b);
   BOOST_C_EXN(a != b);
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -76,7 +76,7 @@ static void test_12_23() {
   BOOST_C_EXN(a == b);
   BOOST_C_EXN(a != b);
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -96,7 +96,7 @@ static void test_12_0() {
   BOOST_CHECK(!(a == b));
   BOOST_CHECK(a != b);
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -116,7 +116,7 @@ static void test_12_1() {
   BOOST_C_EXN(a == b);
   BOOST_C_EXN(a != b);
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -136,7 +136,7 @@ static void test_12_2() {
   BOOST_C_EXN(a == b);
   BOOST_C_EXN(a != b);
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -156,7 +156,7 @@ static void test_12_3() {
   BOOST_CHECK(!(a == b));
   BOOST_CHECK(a != b);
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -168,7 +168,7 @@ static void test_12_12() {
   const I a(1,2), b(1,2);
   BOOST_C_EXN(a == b);
   BOOST_C_EXN(a != b);
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -180,7 +180,7 @@ static void test_11_11() {
   const I a(1,1), b(1,1);
   BOOST_CHECK(a == b);
   BOOST_CHECK(!(a != b));
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
@@ -193,7 +193,7 @@ static void test_11_1() {
   const int b = 1;
   BOOST_CHECK(a == b);
   BOOST_CHECK(!(a != b));
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_unused_variable_warning(a);
   ::detail::ignore_unused_variable_warning(b);
 # endif
