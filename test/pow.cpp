@@ -35,7 +35,7 @@ int test_main(int, char *[]) {
   BOOST_CHECK(test_pow(-3, 2, 1, 1, 0));
   BOOST_CHECK(test_pow(-3, -2, 1, 1, 0));
 
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_warnings();
 # endif
   return 0;

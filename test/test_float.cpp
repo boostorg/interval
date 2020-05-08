@@ -121,7 +121,7 @@ int test_main(int, char *[]) {
   //BOOST_TEST_CHECKPOINT("long double tests");
   //test_all_unaries<long double>();
   //test_all_binaries<long double>();
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_warnings();
 # endif
   return 0;

@@ -96,7 +96,7 @@ int test_main(int, char *[]) {
   BOOST_CHECK(test<float>());
   BOOST_CHECK(test<double>());
   BOOST_CHECK(test<long double>());
-# ifdef __BORLANDC__
+# ifdef BOOST_BORLANDC
   ::detail::ignore_warnings();
 # endif
   return 0;
