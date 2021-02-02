@@ -11,6 +11,8 @@
 #ifndef BOOST_NUMERIC_INTERVAL_HW_ROUNDING_HPP
 #define BOOST_NUMERIC_INTERVAL_HW_ROUNDING_HPP
 
+#include <cassert>
+
 #include <boost/numeric/interval/rounding.hpp>
 #include <boost/numeric/interval/rounded_arith.hpp>
 
@@ -46,6 +48,30 @@ namespace boost {
 namespace numeric {
 namespace interval_lib {
 
+namespace detail
+{
+  template<class T>
+  struct runtime_checker
+  {
+  protected:
+    runtime_checker()
+    {
+      static helper _;
+    }
+
+  private:
+    struct helper
+    {
+      helper()
+      {
+        T a = -(T(-1.1) * T(10.1));
+        T b = +(T(+1.1) * T(10.1));
+        assert(a != b);
+      }
+    };
+  };
+}
+
 /*
  * Three specializations of rounded_math<T>
  */
@@ -53,16 +79,19 @@ namespace interval_lib {
 template<>
 struct rounded_math<float>
   : save_state<rounded_arith_opp<float> >
+  , private detail::runtime_checker<float>
 {};
 
 template<>
 struct rounded_math<double>
   : save_state<rounded_arith_opp<double> >
+  , private detail::runtime_checker<double>
 {};
 
 template<>
 struct rounded_math<long double>
   : save_state<rounded_arith_opp<long double> >
+  , private detail::runtime_checker<long double>
 {};
 
 } // namespace interval_lib
