@@ -8,7 +8,7 @@
  */
 
 #include <boost/numeric/interval.hpp>
-#include <boost/test/minimal.hpp>
+#include <boost/core/lightweight_test.hpp>
 #include "bugs.hpp"
 
 int test_main(int, char *[]) {
