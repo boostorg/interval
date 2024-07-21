@@ -34,7 +34,7 @@ import testing ;
     [ run pow.cpp      ]
 
     [ run cmp.cpp ]
-    [ run cmp_exn.cpp : : : <source>/boost/logic//boost_logic ]
+    [ run cmp_exn.cpp : : : <library>/boost/logic//boost_logic ]
     [ run cmp_exp.cpp ]
     [ run cmp_lex.cpp ]
     [ run cmp_set.cpp ]
