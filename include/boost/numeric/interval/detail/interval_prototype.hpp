@@ -10,6 +10,8 @@
 #ifndef BOOST_NUMERIC_INTERVAL_DETAIL_INTERVAL_PROTOTYPE_HPP
 #define BOOST_NUMERIC_INTERVAL_DETAIL_INTERVAL_PROTOTYPE_HPP
 
+#include <boost/numeric/interval/detail/bugs.hpp>
+
 namespace boost {
 namespace numeric {
 

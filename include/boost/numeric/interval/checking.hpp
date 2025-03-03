@@ -14,6 +14,7 @@
 #include <string>
 #include <cassert>
 #include <boost/limits.hpp>
+#include <boost/numeric/interval/detail/bugs.hpp>
 
 namespace boost {
 namespace numeric {
@@ -21,53 +22,59 @@ namespace interval_lib {
 
 struct exception_create_empty
 {
-  void operator()()
+  BOOST_GPU_ENABLED void operator()()
   {
-    throw std::runtime_error("boost::interval: empty interval created");
+    BOOST_NUMERIC_INTERVAL_throw("boost::interval: empty interval created");
   }
 };
 
 struct exception_invalid_number
 {
-  void operator()()
+  BOOST_GPU_ENABLED void operator()()
   {
-    throw std::invalid_argument("boost::interval: invalid number");
+    BOOST_NUMERIC_INTERVAL_throw("boost::interval: invalid number");
   }
 };
 
 template<class T>
 struct checking_base
 {
-  static T pos_inf()
+  BOOST_GPU_ENABLED static T pos_inf()
   {
-    assert(std::numeric_limits<T>::has_infinity);
-    return std::numeric_limits<T>::infinity();
+    BOOST_NUMERIC_INTERVAL_using_std(numeric_limits);
+    assert(numeric_limits<T>::has_infinity);
+    return numeric_limits<T>::infinity();
   }
-  static T neg_inf()
+  BOOST_GPU_ENABLED static T neg_inf()
   {
-    assert(std::numeric_limits<T>::has_infinity);
-    return -std::numeric_limits<T>::infinity();
+    BOOST_NUMERIC_INTERVAL_using_std(numeric_limits);
+    assert(numeric_limits<T>::has_infinity);
+    return -numeric_limits<T>::infinity();
   }
-  static T nan()
+  BOOST_GPU_ENABLED static T nan()
   {
-    assert(std::numeric_limits<T>::has_quiet_NaN);
-    return std::numeric_limits<T>::quiet_NaN();
+    BOOST_NUMERIC_INTERVAL_using_std(numeric_limits);
+    assert(numeric_limits<T>::has_quiet_NaN);
+    return numeric_limits<T>::quiet_NaN();
   }
-  static bool is_nan(const T& x)
+  BOOST_GPU_ENABLED static bool is_nan(const T& x)
   {
-    return std::numeric_limits<T>::has_quiet_NaN && (x != x);
+    BOOST_NUMERIC_INTERVAL_using_std(numeric_limits);
+    return numeric_limits<T>::has_quiet_NaN && (x != x);
   }
-  static T empty_lower()
+  BOOST_GPU_ENABLED static T empty_lower()
   {
-    return (std::numeric_limits<T>::has_quiet_NaN ?
-            std::numeric_limits<T>::quiet_NaN() : static_cast<T>(1));
+    BOOST_NUMERIC_INTERVAL_using_std(numeric_limits);
+    return (numeric_limits<T>::has_quiet_NaN) ?
+            numeric_limits<T>::quiet_NaN() : static_cast<T>(1);
   }
-  static T empty_upper()
+  BOOST_GPU_ENABLED static T empty_upper()
   {
-    return (std::numeric_limits<T>::has_quiet_NaN ?
-            std::numeric_limits<T>::quiet_NaN() : static_cast<T>(0));
+    BOOST_NUMERIC_INTERVAL_using_std(numeric_limits);
+    return (numeric_limits<T>::has_quiet_NaN) ?
+            numeric_limits<T>::quiet_NaN() : static_cast<T>(0);
   }
-  static bool is_empty(const T& l, const T& u)
+  BOOST_GPU_ENABLED static bool is_empty(const T& l, const T& u)
   {
     return !(l <= u); // safety for partial orders
   }
@@ -77,22 +84,22 @@ template<class T, class Checking = checking_base<T>,
          class Exception = exception_create_empty>
 struct checking_no_empty: Checking
 {
-  static T nan()
+  BOOST_GPU_ENABLED static T nan()
   {
-    assert(false);
+    assert(false); // ?
     return Checking::nan();
   }
-  static T empty_lower()
+  BOOST_GPU_ENABLED static T empty_lower()
   {
     Exception()();
     return Checking::empty_lower();
   }
-  static T empty_upper()
+  BOOST_GPU_ENABLED static T empty_upper()
   {
     Exception()();
     return Checking::empty_upper();
   }
-  static bool is_empty(const T&, const T&)
+  BOOST_GPU_ENABLED static bool is_empty(const T&, const T&)
   {
     return false;
   }
@@ -101,7 +108,7 @@ struct checking_no_empty: Checking
 template<class T, class Checking = checking_base<T> >
 struct checking_no_nan: Checking
 {
-  static bool is_nan(const T&)
+  BOOST_GPU_ENABLED static bool is_nan(const T&)
   {
     return false;
   }
@@ -111,9 +118,11 @@ template<class T, class Checking = checking_base<T>,
          class Exception = exception_invalid_number>
 struct checking_catch_nan: Checking
 {
-  static bool is_nan(const T& x)
+  BOOST_GPU_ENABLED static bool is_nan(const T& x)
   {
-    if (Checking::is_nan(x)) Exception()();
+    if (Checking::is_nan(x)) {
+      Exception()();
+    }
     return false;
   }
 };

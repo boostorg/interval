@@ -22,8 +22,8 @@ template<class T, class Rounding>
 struct rounded_transc_exact: Rounding
 {
 # define BOOST_NUMERIC_INTERVAL_new_func(f) \
-    T f##_down(const T& x) { BOOST_NUMERIC_INTERVAL_using_math(f); return f(x); } \
-    T f##_up  (const T& x) { BOOST_NUMERIC_INTERVAL_using_math(f); return f(x); }
+    BOOST_GPU_ENABLED T f##_down(const T& x) { BOOST_NUMERIC_INTERVAL_using_math(f); return f(x); } \
+    BOOST_GPU_ENABLED T f##_up  (const T& x) { BOOST_NUMERIC_INTERVAL_using_math(f); return f(x); }
   BOOST_NUMERIC_INTERVAL_new_func(exp)
   BOOST_NUMERIC_INTERVAL_new_func(log)
   BOOST_NUMERIC_INTERVAL_new_func(sin)
@@ -37,8 +37,8 @@ struct rounded_transc_exact: Rounding
   BOOST_NUMERIC_INTERVAL_new_func(tanh)
 # undef BOOST_NUMERIC_INTERVAL_new_func
 # define BOOST_NUMERIC_INTERVAL_new_func(f) \
-    T f##_down(const T& x) { BOOST_NUMERIC_INTERVAL_using_ahyp(f); return f(x); } \
-    T f##_up  (const T& x) { BOOST_NUMERIC_INTERVAL_using_ahyp(f); return f(x); }
+    BOOST_GPU_ENABLED T f##_down(const T& x) { BOOST_NUMERIC_INTERVAL_using_ahyp(f); return f(x); } \
+    BOOST_GPU_ENABLED T f##_up  (const T& x) { BOOST_NUMERIC_INTERVAL_using_ahyp(f); return f(x); }
   BOOST_NUMERIC_INTERVAL_new_func(asinh)
   BOOST_NUMERIC_INTERVAL_new_func(acosh)
   BOOST_NUMERIC_INTERVAL_new_func(atanh)

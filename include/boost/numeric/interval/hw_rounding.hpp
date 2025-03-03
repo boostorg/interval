@@ -34,6 +34,10 @@
 #  include <boost/numeric/interval/detail/ia64_rounding_control.hpp>
 #endif
 
+#if defined(__CUDACC__) || defined(__NVCC__)
+#  include <boost/numeric/interval/detail/cuda_rounding_control.hpp>
+#endif
+
 #if defined(BOOST_NUMERIC_INTERVAL_NO_HARDWARE) && !defined(BOOST_NO_FENV_H)
 #  include <boost/numeric/interval/detail/c99_rounding_control.hpp>
 #endif

@@ -18,14 +18,13 @@ namespace boost {
 namespace numeric {
 
 namespace interval_lib {
-    
-class comparison_error
-  : public std::runtime_error 
+
+struct comparison_error
 {
-public:
-  comparison_error()
-    : std::runtime_error("boost::interval: uncertain comparison")
-  { }
+  BOOST_GPU_ENABLED void operator()()
+  {
+    BOOST_NUMERIC_INTERVAL_throw("boost::interval: uncertain comparison");
+  }
 };
 
 } // namespace interval_lib
@@ -44,69 +43,76 @@ public:
   typedef T base_type;
   typedef Policies traits_type;
 
-  T const &lower() const;
-  T const &upper() const;
+  BOOST_GPU_ENABLED T const &lower() const;
+  BOOST_GPU_ENABLED T const &upper() const;
 
-  interval();
-  interval(T const &v);
-  template<class T1> interval(T1 const &v);
-  interval(T const &l, T const &u);
-  template<class T1, class T2> interval(T1 const &l, T2 const &u);
-  interval(interval<T, Policies> const &r);
-  template<class Policies1> interval(interval<T, Policies1> const &r);
-  template<class T1, class Policies1> interval(interval<T1, Policies1> const &r);
+  BOOST_GPU_ENABLED interval();
+  BOOST_GPU_ENABLED interval(T const &v);
+  template<class T1>
+  BOOST_GPU_ENABLED interval(T1 const &v);
+  BOOST_GPU_ENABLED interval(T const &l, T const &u);
+  template<class T1, class T2>
+  BOOST_GPU_ENABLED interval(T1 const &l, T2 const &u);
+  BOOST_GPU_ENABLED interval(interval<T, Policies> const &r);
+  template<class Policies1>
+  BOOST_GPU_ENABLED interval(interval<T, Policies1> const &r);
+  template<class T1, class Policies1>
+  BOOST_GPU_ENABLED interval(interval<T1, Policies1> const &r);
 
-  interval &operator=(T const &v);
-  template<class T1> interval &operator=(T1 const &v);
-  interval &operator=(interval<T, Policies> const &r);
-  template<class Policies1> interval &operator=(interval<T, Policies1> const &r);
-  template<class T1, class Policies1> interval &operator=(interval<T1, Policies1> const &r);
- 
-  void assign(const T& l, const T& u);
+  BOOST_GPU_ENABLED interval &operator=(T const &v);
+  template<class T1>
+  BOOST_GPU_ENABLED interval &operator=(T1 const &v);
+  BOOST_GPU_ENABLED interval &operator=(interval<T, Policies> const &r);
+  template<class Policies1>
+  BOOST_GPU_ENABLED interval &operator=(interval<T, Policies1> const &r);
+  template<class T1, class Policies1>
+  BOOST_GPU_ENABLED interval &operator=(interval<T1, Policies1> const &r);
 
-  static interval empty();
-  static interval whole();
-  static interval hull(const T& x, const T& y);
+  BOOST_GPU_ENABLED void assign(const T& l, const T& u);
 
-  interval& operator+= (const T& r);
-  interval& operator+= (const interval& r);
-  interval& operator-= (const T& r);
-  interval& operator-= (const interval& r);
-  interval& operator*= (const T& r);
-  interval& operator*= (const interval& r);
-  interval& operator/= (const T& r);
-  interval& operator/= (const interval& r);
+  BOOST_GPU_ENABLED static interval empty();
+  BOOST_GPU_ENABLED static interval whole();
+  BOOST_GPU_ENABLED static interval hull(const T& x, const T& y);
 
-  bool operator< (const interval_holder& r) const;
-  bool operator> (const interval_holder& r) const;
-  bool operator<= (const interval_holder& r) const;
-  bool operator>= (const interval_holder& r) const;
-  bool operator== (const interval_holder& r) const;
-  bool operator!= (const interval_holder& r) const;
+  BOOST_GPU_ENABLED interval& operator+= (const T& r);
+  BOOST_GPU_ENABLED interval& operator+= (const interval& r);
+  BOOST_GPU_ENABLED interval& operator-= (const T& r);
+  BOOST_GPU_ENABLED interval& operator-= (const interval& r);
+  BOOST_GPU_ENABLED interval& operator*= (const T& r);
+  BOOST_GPU_ENABLED interval& operator*= (const interval& r);
+  BOOST_GPU_ENABLED interval& operator/= (const T& r);
+  BOOST_GPU_ENABLED interval& operator/= (const interval& r);
 
-  bool operator< (const number_holder& r) const;
-  bool operator> (const number_holder& r) const;
-  bool operator<= (const number_holder& r) const;
-  bool operator>= (const number_holder& r) const;
-  bool operator== (const number_holder& r) const;
-  bool operator!= (const number_holder& r) const;
+  BOOST_GPU_ENABLED bool operator< (const interval_holder& r) const;
+  BOOST_GPU_ENABLED bool operator> (const interval_holder& r) const;
+  BOOST_GPU_ENABLED bool operator<= (const interval_holder& r) const;
+  BOOST_GPU_ENABLED bool operator>= (const interval_holder& r) const;
+  BOOST_GPU_ENABLED bool operator== (const interval_holder& r) const;
+  BOOST_GPU_ENABLED bool operator!= (const interval_holder& r) const;
+
+  BOOST_GPU_ENABLED bool operator< (const number_holder& r) const;
+  BOOST_GPU_ENABLED bool operator> (const number_holder& r) const;
+  BOOST_GPU_ENABLED bool operator<= (const number_holder& r) const;
+  BOOST_GPU_ENABLED bool operator>= (const number_holder& r) const;
+  BOOST_GPU_ENABLED bool operator== (const number_holder& r) const;
+  BOOST_GPU_ENABLED bool operator!= (const number_holder& r) const;
 
   // the following is for internal use only, it is not a published interface
   // nevertheless, it's public because friends don't always work correctly.
-  interval(const T& l, const T& u, bool): low(l), up(u) {}
-  void set_empty();
-  void set_whole();
-  void set(const T& l, const T& u);
+  BOOST_GPU_ENABLED interval(const T& l, const T& u, bool): low(l), up(u) {}
+  BOOST_GPU_ENABLED void set_empty();
+  BOOST_GPU_ENABLED void set_whole();
+  BOOST_GPU_ENABLED void set(const T& l, const T& u);
 
 private:
   struct interval_holder {
     template<class Policies2>
-    interval_holder(const interval<T, Policies2>& r)
+    BOOST_GPU_ENABLED interval_holder(const interval<T, Policies2>& r)
       : low(r.lower()), up(r.upper())
     {
       typedef typename Policies2::checking checking2;
       if (checking2::is_empty(low, up))
-        throw interval_lib::comparison_error();
+        interval_lib::comparison_error()();
     }
 
     const T& low;
@@ -114,11 +120,11 @@ private:
   };
 
   struct number_holder {
-    number_holder(const T& r) : val(r)
+    BOOST_GPU_ENABLED number_holder(const T& r) : val(r)
     {
       typedef typename Policies::checking checking;
       if (checking::is_nan(r))
-        throw interval_lib::comparison_error();
+        interval_lib::comparison_error()();
     }
     
     const T& val;
@@ -132,18 +138,18 @@ private:
 };
 
 template<class T, class Policies> inline
-interval<T, Policies>::interval():
+BOOST_GPU_ENABLED interval<T, Policies>::interval():
   low(static_cast<T>(0)), up(static_cast<T>(0))
 {}
 
 template<class T, class Policies> inline
-interval<T, Policies>::interval(T const &v): low(v), up(v)
+BOOST_GPU_ENABLED interval<T, Policies>::interval(T const &v): low(v), up(v)
 {
   if (checking::is_nan(v)) set_empty();
 }
 
 template<class T, class Policies> template<class T1> inline
-interval<T, Policies>::interval(T1 const &v)
+BOOST_GPU_ENABLED interval<T, Policies>::interval(T1 const &v)
 {
   if (checking::is_nan(v)) set_empty();
   else {
@@ -154,7 +160,7 @@ interval<T, Policies>::interval(T1 const &v)
 }
 
 template<class T, class Policies> template<class T1, class T2> inline
-interval<T, Policies>::interval(T1 const &l, T2 const &u)
+BOOST_GPU_ENABLED interval<T, Policies>::interval(T1 const &l, T2 const &u)
 {
   if (checking::is_nan(l) || checking::is_nan(u) || !(l <= u)) set_empty();
   else {
@@ -165,7 +171,7 @@ interval<T, Policies>::interval(T1 const &l, T2 const &u)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies>::interval(T const &l, T const &u): low(l), up(u)
+BOOST_GPU_ENABLED interval<T, Policies>::interval(T const &l, T const &u): low(l), up(u)
 {
   if (checking::is_nan(l) || checking::is_nan(u) || !(l <= u))
     set_empty();
@@ -173,18 +179,18 @@ interval<T, Policies>::interval(T const &l, T const &u): low(l), up(u)
 
 
 template<class T, class Policies> inline
-interval<T, Policies>::interval(interval<T, Policies> const &r): low(r.lower()), up(r.upper())
+BOOST_GPU_ENABLED interval<T, Policies>::interval(interval<T, Policies> const &r): low(r.lower()), up(r.upper())
 {}
 
 template<class T, class Policies> template<class Policies1> inline
-interval<T, Policies>::interval(interval<T, Policies1> const &r): low(r.lower()), up(r.upper())
+BOOST_GPU_ENABLED interval<T, Policies>::interval(interval<T, Policies1> const &r): low(r.lower()), up(r.upper())
 {
   typedef typename Policies1::checking checking1;
   if (checking1::is_empty(r.lower(), r.upper())) set_empty();
 }
 
 template<class T, class Policies> template<class T1, class Policies1> inline
-interval<T, Policies>::interval(interval<T1, Policies1> const &r)
+BOOST_GPU_ENABLED interval<T, Policies>::interval(interval<T1, Policies1> const &r)
 {
   typedef typename Policies1::checking checking1;
   if (checking1::is_empty(r.lower(), r.upper())) set_empty();
@@ -196,7 +202,7 @@ interval<T, Policies>::interval(interval<T1, Policies1> const &r)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> &interval<T, Policies>::operator=(T const &v)
+BOOST_GPU_ENABLED interval<T, Policies> &interval<T, Policies>::operator=(T const &v)
 {
   if (checking::is_nan(v)) set_empty();
   else low = up = v;
@@ -204,7 +210,7 @@ interval<T, Policies> &interval<T, Policies>::operator=(T const &v)
 }
 
 template<class T, class Policies> template<class T1> inline
-interval<T, Policies> &interval<T, Policies>::operator=(T1 const &v)
+BOOST_GPU_ENABLED interval<T, Policies> &interval<T, Policies>::operator=(T1 const &v)
 {
   if (checking::is_nan(v)) set_empty();
   else {
@@ -216,7 +222,7 @@ interval<T, Policies> &interval<T, Policies>::operator=(T1 const &v)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> &interval<T, Policies>::operator=(interval<T, Policies> const &r)
+BOOST_GPU_ENABLED interval<T, Policies> &interval<T, Policies>::operator=(interval<T, Policies> const &r)
 {
   low = r.lower();
   up  = r.upper();
@@ -224,7 +230,7 @@ interval<T, Policies> &interval<T, Policies>::operator=(interval<T, Policies> co
 }
 
 template<class T, class Policies> template<class Policies1> inline
-interval<T, Policies> &interval<T, Policies>::operator=(interval<T, Policies1> const &r)
+BOOST_GPU_ENABLED interval<T, Policies> &interval<T, Policies>::operator=(interval<T, Policies1> const &r)
 {
   typedef typename Policies1::checking checking1;
   if (checking1::is_empty(r.lower(), r.upper())) set_empty();
@@ -236,7 +242,7 @@ interval<T, Policies> &interval<T, Policies>::operator=(interval<T, Policies1> c
 }
 
 template<class T, class Policies> template<class T1, class Policies1> inline
-interval<T, Policies> &interval<T, Policies>::operator=(interval<T1, Policies1> const &r)
+BOOST_GPU_ENABLED interval<T, Policies> &interval<T, Policies>::operator=(interval<T1, Policies1> const &r)
 {
   typedef typename Policies1::checking checking1;
   if (checking1::is_empty(r.lower(), r.upper())) set_empty();
@@ -249,7 +255,7 @@ interval<T, Policies> &interval<T, Policies>::operator=(interval<T1, Policies1> 
 }
 
 template<class T, class Policies> inline
-void interval<T, Policies>::assign(const T& l, const T& u)
+BOOST_GPU_ENABLED void interval<T, Policies>::assign(const T& l, const T& u)
 {
   if (checking::is_nan(l) || checking::is_nan(u) || !(l <= u))
     set_empty();
@@ -257,28 +263,28 @@ void interval<T, Policies>::assign(const T& l, const T& u)
 }
 
 template<class T, class Policies> inline
-void interval<T, Policies>::set(const T& l, const T& u)
+BOOST_GPU_ENABLED void interval<T, Policies>::set(const T& l, const T& u)
 {
   low = l;
   up  = u;
 }
 
 template<class T, class Policies> inline
-void interval<T, Policies>::set_empty()
+BOOST_GPU_ENABLED void interval<T, Policies>::set_empty()
 {
   low = checking::empty_lower();
   up  = checking::empty_upper();
 }
 
 template<class T, class Policies> inline
-void interval<T, Policies>::set_whole()
+BOOST_GPU_ENABLED void interval<T, Policies>::set_whole()
 {
   low = checking::neg_inf();
   up  = checking::pos_inf();
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> interval<T, Policies>::hull(const T& x, const T& y)
+BOOST_GPU_ENABLED interval<T, Policies> interval<T, Policies>::hull(const T& x, const T& y)
 {
   bool bad_x = checking::is_nan(x);
   bool bad_y = checking::is_nan(y);
@@ -292,26 +298,26 @@ interval<T, Policies> interval<T, Policies>::hull(const T& x, const T& y)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> interval<T, Policies>::empty()
+BOOST_GPU_ENABLED interval<T, Policies> interval<T, Policies>::empty()
 {
   return interval<T, Policies>(checking::empty_lower(),
                                checking::empty_upper(), true);
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> interval<T, Policies>::whole()
+BOOST_GPU_ENABLED interval<T, Policies> interval<T, Policies>::whole()
 {
   return interval<T, Policies>(checking::neg_inf(), checking::pos_inf(), true);
 }
 
 template<class T, class Policies> inline
-const T& interval<T, Policies>::lower() const
+BOOST_GPU_ENABLED const T& interval<T, Policies>::lower() const
 {
   return low;
 }
 
 template<class T, class Policies> inline
-const T& interval<T, Policies>::upper() const
+BOOST_GPU_ENABLED const T& interval<T, Policies>::upper() const
 {
   return up;
 }
@@ -321,63 +327,69 @@ const T& interval<T, Policies>::upper() const
  */
 
 template<class T, class Policies> inline
-bool interval<T, Policies>::operator< (const interval_holder& r) const
+BOOST_GPU_ENABLED bool interval<T, Policies>::operator< (const interval_holder& r) const
 {
   if (!checking::is_empty(low, up)) {
     if (up < r.low) return true;
     else if (low >= r.up) return false;
   }
-  throw interval_lib::comparison_error();
+  interval_lib::comparison_error()();
+  return false; // never reached
 }
 
 template<class T, class Policies> inline
-bool interval<T, Policies>::operator> (const interval_holder& r) const
+BOOST_GPU_ENABLED bool interval<T, Policies>::operator> (const interval_holder& r) const
 {
   if (!checking::is_empty(low, up)) {
     if (low > r.up) return true;
     else if (up <= r.low) return false;
   }
-  throw interval_lib::comparison_error();
+  interval_lib::comparison_error()();
+  return false; // never reached
 }
 
 template<class T, class Policies> inline
-bool interval<T, Policies>::operator<= (const interval_holder& r) const
+BOOST_GPU_ENABLED bool interval<T, Policies>::operator<= (const interval_holder& r) const
 {
   if (!checking::is_empty(low, up)) {
     if (up <= r.low) return true;
     else if (low > r.up) return false;
   }
-  throw interval_lib::comparison_error();
+  interval_lib::comparison_error()();
+  return false; // never reached
 }
 
 template<class T, class Policies> inline
-bool interval<T, Policies>::operator>= (const interval_holder& r) const
+BOOST_GPU_ENABLED bool interval<T, Policies>::operator>= (const interval_holder& r) const
 {
   if (!checking::is_empty(low, up)) {
     if (low >= r.up) return true;
     else if (up < r.low) return false;
   }
-  throw interval_lib::comparison_error();
+  interval_lib::comparison_error()();
+  return false; // never reached
 }
 
 template<class T, class Policies> inline
-bool interval<T, Policies>::operator== (const interval_holder& r) const
+BOOST_GPU_ENABLED bool interval<T, Policies>::operator== (const interval_holder& r) const
 {
   if (!checking::is_empty(low, up)) {
     if (up == r.low && low == r.up) return true;
     else if (up < r.low || low > r.up) return false;
   }
-  throw interval_lib::comparison_error();
+  interval_lib::comparison_error()();
+  return false; // never reached
 }
 
 template<class T, class Policies> inline
-bool interval<T, Policies>::operator!= (const interval_holder& r) const
+BOOST_GPU_ENABLED bool interval<T, Policies>::operator!= (const interval_holder& r) const
 {
   if (!checking::is_empty(low, up)) {
     if (up < r.low || low > r.up) return true;
     else if (up == r.low && low == r.up) return false;
   }
-  throw interval_lib::comparison_error();
+  interval_lib::comparison_error()();
+  return false; // never reached
 }
 
 /*
@@ -385,63 +397,69 @@ bool interval<T, Policies>::operator!= (const interval_holder& r) const
  */
 
 template<class T, class Policies> inline
-bool interval<T, Policies>::operator< (const number_holder& r) const
+BOOST_GPU_ENABLED bool interval<T, Policies>::operator< (const number_holder& r) const
 {
   if (!checking::is_empty(low, up)) {
     if (up < r.val) return true;
     else if (low >= r.val) return false;
   }
-  throw interval_lib::comparison_error();
+  interval_lib::comparison_error()();
+  return false; // never reached
 }
 
 template<class T, class Policies> inline
-bool interval<T, Policies>::operator> (const number_holder& r) const
+BOOST_GPU_ENABLED bool interval<T, Policies>::operator> (const number_holder& r) const
 {
   if (!checking::is_empty(low, up)) {
     if (low > r.val) return true;
     else if (up <= r.val) return false;
   }
-  throw interval_lib::comparison_error();
+  interval_lib::comparison_error()();
+  return false; // never reached
 }
 
 template<class T, class Policies> inline
-bool interval<T, Policies>::operator<= (const number_holder& r) const
+BOOST_GPU_ENABLED bool interval<T, Policies>::operator<= (const number_holder& r) const
 {
   if (!checking::is_empty(low, up)) {
     if (up <= r.val) return true;
     else if (low > r.val) return false;
   }
-  throw interval_lib::comparison_error();
+  interval_lib::comparison_error()();
+  return false; // never reached
 }
 
 template<class T, class Policies> inline
-bool interval<T, Policies>::operator>= (const number_holder& r) const
+BOOST_GPU_ENABLED bool interval<T, Policies>::operator>= (const number_holder& r) const
 {
   if (!checking::is_empty(low, up)) {
     if (low >= r.val) return true;
     else if (up < r.val) return false;
   }
-  throw interval_lib::comparison_error();
+  interval_lib::comparison_error()();
+  return false; // never reached
 }
 
 template<class T, class Policies> inline
-bool interval<T, Policies>::operator== (const number_holder& r) const
+BOOST_GPU_ENABLED bool interval<T, Policies>::operator== (const number_holder& r) const
 {
   if (!checking::is_empty(low, up)) {
     if (up == r.val && low == r.val) return true;
     else if (up < r.val || low > r.val) return false;
   }
-  throw interval_lib::comparison_error();
+  interval_lib::comparison_error()();
+  return false; // never reached
 }
 
 template<class T, class Policies> inline
-bool interval<T, Policies>::operator!= (const number_holder& r) const
+BOOST_GPU_ENABLED bool interval<T, Policies>::operator!= (const number_holder& r) const
 {
   if (!checking::is_empty(low, up)) {
     if (up < r.val || low > r.val) return true;
     else if (up == r.val && low == r.val) return false;
   }
-  throw interval_lib::comparison_error();
+  interval_lib::comparison_error()();
+  return false; // never reached
 }
 
 } // namespace numeric

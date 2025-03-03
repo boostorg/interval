@@ -40,4 +40,4 @@ struct c99_rounding_control
 } // namespace numeric
 } // namespace boost
 
-#endif // BOOST_NUMERIC_INTERVAL_DETAIL_C99SUB_ROUBDING_CONTROL_HPP
+#endif // BOOST_NUMERIC_INTERVAL_DETAIL_C99SUB_ROUNDING_CONTROL_HPP

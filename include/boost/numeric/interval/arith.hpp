@@ -26,13 +26,13 @@ namespace numeric {
  */
 
 template<class T, class Policies> inline
-const interval<T, Policies>& operator+(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED const interval<T, Policies>& operator+(const interval<T, Policies>& x)
 {
   return x;
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator-(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> operator-(const interval<T, Policies>& x)
 {
   if (interval_lib::detail::test_input(x))
     return interval<T, Policies>::empty();
@@ -40,7 +40,7 @@ interval<T, Policies> operator-(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies>& interval<T, Policies>::operator+=(const interval<T, Policies>& r)
+BOOST_GPU_ENABLED interval<T, Policies>& interval<T, Policies>::operator+=(const interval<T, Policies>& r)
 {
   if (interval_lib::detail::test_input(*this, r))
     set_empty();
@@ -52,7 +52,7 @@ interval<T, Policies>& interval<T, Policies>::operator+=(const interval<T, Polic
 }
 
 template<class T, class Policies> inline
-interval<T, Policies>& interval<T, Policies>::operator+=(const T& r)
+BOOST_GPU_ENABLED interval<T, Policies>& interval<T, Policies>::operator+=(const T& r)
 {
   if (interval_lib::detail::test_input(*this, r))
     set_empty();
@@ -64,7 +64,7 @@ interval<T, Policies>& interval<T, Policies>::operator+=(const T& r)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies>& interval<T, Policies>::operator-=(const interval<T, Policies>& r)
+BOOST_GPU_ENABLED interval<T, Policies>& interval<T, Policies>::operator-=(const interval<T, Policies>& r)
 {
   if (interval_lib::detail::test_input(*this, r))
     set_empty();
@@ -76,7 +76,7 @@ interval<T, Policies>& interval<T, Policies>::operator-=(const interval<T, Polic
 }
 
 template<class T, class Policies> inline
-interval<T, Policies>& interval<T, Policies>::operator-=(const T& r)
+BOOST_GPU_ENABLED interval<T, Policies>& interval<T, Policies>::operator-=(const T& r)
 {
   if (interval_lib::detail::test_input(*this, r))
     set_empty();
@@ -88,32 +88,32 @@ interval<T, Policies>& interval<T, Policies>::operator-=(const T& r)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies>& interval<T, Policies>::operator*=(const interval<T, Policies>& r)
+BOOST_GPU_ENABLED interval<T, Policies>& interval<T, Policies>::operator*=(const interval<T, Policies>& r)
 {
   return *this = *this * r;
 }
 
 template<class T, class Policies> inline
-interval<T, Policies>& interval<T, Policies>::operator*=(const T& r)
+BOOST_GPU_ENABLED interval<T, Policies>& interval<T, Policies>::operator*=(const T& r)
 {
   return *this = r * *this;
 }
 
 template<class T, class Policies> inline
-interval<T, Policies>& interval<T, Policies>::operator/=(const interval<T, Policies>& r)
+BOOST_GPU_ENABLED interval<T, Policies>& interval<T, Policies>::operator/=(const interval<T, Policies>& r)
 {
   return *this = *this / r;
 }
 
 template<class T, class Policies> inline
-interval<T, Policies>& interval<T, Policies>::operator/=(const T& r)
+BOOST_GPU_ENABLED interval<T, Policies>& interval<T, Policies>::operator/=(const T& r)
 {
   return *this = *this / r;
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator+(const interval<T, Policies>& x,
-                                const interval<T, Policies>& y)
+BOOST_GPU_ENABLED interval<T, Policies> operator+(const interval<T, Policies>& x,
+                                                  const interval<T, Policies>& y)
 {
   if (interval_lib::detail::test_input(x, y))
     return interval<T, Policies>::empty();
@@ -123,7 +123,7 @@ interval<T, Policies> operator+(const interval<T, Policies>& x,
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator+(const T& x, const interval<T, Policies>& y)
+BOOST_GPU_ENABLED interval<T, Policies> operator+(const T& x, const interval<T, Policies>& y)
 {
   if (interval_lib::detail::test_input(x, y))
     return interval<T, Policies>::empty();
@@ -133,11 +133,11 @@ interval<T, Policies> operator+(const T& x, const interval<T, Policies>& y)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator+(const interval<T, Policies>& x, const T& y)
+BOOST_GPU_ENABLED interval<T, Policies> operator+(const interval<T, Policies>& x, const T& y)
 { return y + x; }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator-(const interval<T, Policies>& x,
+BOOST_GPU_ENABLED interval<T, Policies> operator-(const interval<T, Policies>& x,
                                 const interval<T, Policies>& y)
 {
   if (interval_lib::detail::test_input(x, y))
@@ -148,7 +148,7 @@ interval<T, Policies> operator-(const interval<T, Policies>& x,
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator-(const T& x, const interval<T, Policies>& y)
+BOOST_GPU_ENABLED interval<T, Policies> operator-(const T& x, const interval<T, Policies>& y)
 {
   if (interval_lib::detail::test_input(x, y))
     return interval<T, Policies>::empty();
@@ -158,7 +158,7 @@ interval<T, Policies> operator-(const T& x, const interval<T, Policies>& y)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator-(const interval<T, Policies>& x, const T& y)
+BOOST_GPU_ENABLED interval<T, Policies> operator-(const interval<T, Policies>& x, const T& y)
 {
   if (interval_lib::detail::test_input(x, y))
     return interval<T, Policies>::empty();
@@ -168,8 +168,8 @@ interval<T, Policies> operator-(const interval<T, Policies>& x, const T& y)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator*(const interval<T, Policies>& x,
-                                const interval<T, Policies>& y)
+BOOST_GPU_ENABLED interval<T, Policies> operator*(const interval<T, Policies>& x,
+                                                  const interval<T, Policies>& y)
 {
   BOOST_USING_STD_MIN();
   BOOST_USING_STD_MAX();
@@ -223,7 +223,7 @@ interval<T, Policies> operator*(const interval<T, Policies>& x,
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator*(const T& x, const interval<T, Policies>& y)
+BOOST_GPU_ENABLED interval<T, Policies> operator*(const T& x, const interval<T, Policies>& y)
 { 
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x, y))
@@ -241,11 +241,11 @@ interval<T, Policies> operator*(const T& x, const interval<T, Policies>& y)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator*(const interval<T, Policies>& x, const T& y)
+BOOST_GPU_ENABLED interval<T, Policies> operator*(const interval<T, Policies>& x, const T& y)
 { return y * x; }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator/(const interval<T, Policies>& x,
+BOOST_GPU_ENABLED interval<T, Policies> operator/(const interval<T, Policies>& x,
                                 const interval<T, Policies>& y)
 {
   if (interval_lib::detail::test_input(x, y))
@@ -266,7 +266,7 @@ interval<T, Policies> operator/(const interval<T, Policies>& x,
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator/(const T& x, const interval<T, Policies>& y)
+BOOST_GPU_ENABLED interval<T, Policies> operator/(const T& x, const interval<T, Policies>& y)
 {
   if (interval_lib::detail::test_input(x, y))
     return interval<T, Policies>::empty();
@@ -286,7 +286,7 @@ interval<T, Policies> operator/(const T& x, const interval<T, Policies>& y)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator/(const interval<T, Policies>& x, const T& y)
+BOOST_GPU_ENABLED interval<T, Policies> operator/(const interval<T, Policies>& x, const T& y)
 {
   if (interval_lib::detail::test_input(x, y) || interval_lib::user::is_zero(y))
     return interval<T, Policies>::empty();
