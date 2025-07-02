@@ -10,7 +10,9 @@
 
 #include <boost/numeric/interval.hpp>
 #include <boost/numeric/interval/ext/integer.hpp>
+#ifdef BOOST_BORLANDC
 #include "bugs.hpp"
+#endif
 
 typedef boost::numeric::interval<float> I;
 
