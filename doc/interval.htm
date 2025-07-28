@@ -107,11 +107,11 @@
   <em><strong>inclusion property</strong></em>:</p>
 
   <dl>
-    <dd>``if <i>f</i> is a function on a set of numbers, <i>f</i> can be
+    <dd>"If <i>f</i> is a function on a set of numbers, <i>f</i> can be
     extended to a new function defined on intervals. This new function
     <i>f</i> takes one interval argument and returns an interval result such
     as: &forall; <i>x</i> &isin; [<i>a</i>,<i>b</i>], <i>f</i>(<i>x</i>)
-    &isin; <i>f</i>([<i>a</i>,<i>b</i>]).''</dd>
+    &isin; <i>f</i>([<i>a</i>,<i>b</i>])."</dd>
   </dl>
 
   <p>Such a property is not limited to functions with only one argument.
@@ -153,10 +153,10 @@
 
   <p>Secondly, the computations must be exact or provide some rounding
   methods (for instance, toward minus or plus infinity) if we want to
-  guarantee the inclusion property. Note that we also may explicitely specify
+  guarantee the inclusion property. Note that we also may explicitly specify
   no rounding, for instance if the base number type is exact, i.e. the result
   of a mathematical operation is always computed and represented without loss
-  of precision. If the number type is not exact, we may still explicitely
+  of precision. If the number type is not exact, we may still explicitly
   specify no rounding, with the obvious consequence that the inclusion
   property is no longer guaranteed.</p>
 
@@ -211,11 +211,11 @@
   only if: &exist; <i>x</i> &isin; [<i>a</i>,<i>b</i>] &exist; <i>y</i>
   &isin; [<i>c</i>,<i>d</i>], <i>x</i> &lt; <i>y</i>.</p>
 
-  <p>Since any of these solution has a clearly defined semantics, it is not
+  <p>Since any of these solutions has a clearly defined semantics, it is not
   clear that we should enforce either of them. For this reason, the default
-  behavior consists to mimic the real comparisons by throwing an exception in
-  the indeterminate case. Other behaviors can be selected bu using specific
-  comparison namespace. There is also a bunch of explicitely named comparison
+  behavior consists in mimicking the real comparisons by throwing an exception in
+  the indeterminate case. Other behaviors can be selected by using specific
+  comparison namespace. There is also a bunch of explicitly named comparison
   functions. See <a href="comparisons.htm">comparisons</a> pages for further
   details.</p>
 
@@ -248,7 +248,7 @@
   <p>For some functions which take several parameters of type
   <code>interval&lt;T&gt;</code>, all combinations of argument types
   <code>T</code> and <code>interval&lt;T&gt;</code> which contain at least
-  one <code>interval&lt;T&gt;</code>, are considered in order to avoid a
+  one <code>interval&lt;T&gt;</code> are considered in order to avoid a
   conversion from the arguments of type <code>T</code> to a singleton of type
   <code>interval&lt;T&gt;</code>. This is done for efficiency reasons (the
   fact that an argument is a singleton sometimes renders some tests
@@ -523,7 +523,7 @@ class interval
   <p>The operators <code>/</code> and <code>/=</code> will try to produce an
   empty interval if the denominator is exactly zero. If the denominator
   contains zero (but not only zero), the result will be the smallest interval
-  containing the set of division results; so one of its bound will be
+  containing the set of division results; so one of its bounds will be
   infinite, but it may not be the whole interval.</p>
 
   <h4><code>lower</code> <code>upper</code> <code>median</code>
@@ -630,14 +630,14 @@ class interval
 
   <p>The function <code>fmod(interval x, interval y)</code> expects the lower
   bound of <code>y</code> to be strictly positive and returns an interval
-  <code>z</code> such as <code>0 &lt;= z.lower() &lt; y.upper()</code> and
-  such as <code>z</code> is a superset of <code>x-n*y</code> (with
+  <code>z</code> such that <code>0 &lt;= z.lower() &lt; y.upper()</code> and
+  such that <code>z</code> is a superset of <code>x-n*y</code> (with
   <code>n</code> being an integer). So, if the two arguments are positive
   singletons, this function <code>fmod(interval, interval)</code> will behave
   like the traditional function <code>fmod(double, double)</code>.</p>
 
   <p>Please note that <code>fmod</code> does not respect the inclusion
-  property of arithmetic interval. For example, the result of
+  property of interval arithmetic. For example, the result of
   <code>fmod</code>([13,17],[7,8]) should be [0,8] (since it must contain
   [0,3] and [5,8]). But this answer is not really useful when the purpose is
   to restrict an interval in order to compute a periodic function. It is the
@@ -654,7 +654,7 @@ class interval
 
   <p>Some constants are hidden in the
   <code>boost::numeric::interval_lib</code> namespace. They need to be
-  explicitely templated by the interval type. The functions are
+  explicitly templated by the interval type. The functions are
   <code>pi&lt;I&gt;()</code>, <code>pi_half&lt;I&gt;()</code> and
   <code>pi_twice&lt;I&gt;()</code>, and they return an object of interval
   type <code>I</code>. Their respective values are &pi;, &pi;/2 and
@@ -827,7 +827,7 @@ namespace compare {
   <p>Another misleading interpretation of the comparison is: you cannot
   always expect [a,b] &lt; [c,d] to be !([a,b] &gt;= [c,d]) since the
   comparison is not necessarily total. Equality and less comparison should be
-  seen as two distincts relational operators. However the default comparison
+  seen as two distinct relational operators. However the default comparison
   operators do respect this property since they throw an exception whenever
   [a,b] and [c,d] overlap.</p>
 
@@ -841,7 +841,7 @@ namespace compare {
   <code>square(x)</code>, <code>x-x</code> and 0, etc. So the main cause of
   wide intervals is that interval arithmetic does not identify different
   occurrences of the same variable. So, whenever possible, the user has to
-  rewrite the formulas to eliminate multiple occurences of the same variable.
+  rewrite the formulas to eliminate multiple occurrences of the same variable.
   For example, <code>square(x)-2*x</code> is far less precise than
   <code>square(x-1)-1</code>.</p>
 
@@ -914,7 +914,7 @@ namespace compare {
   <p><strong>Specialization of <code>std::less</code>.</strong> Since the
   operator <code>&lt;</code> depends on the comparison namespace locally
   chosen by the user, it is not possible to correctly specialize
-  <code>std::less</code>. So you have to explicitely provide such a class to
+  <code>std::less</code>. So you have to explicitly provide such a class to
   all the algorithms and templates that could require it (for example,
   <code>std::map</code>).</p>
 
@@ -929,9 +929,9 @@ namespace compare {
   template codes, it is common there are operations like <code>2*x</code>.
   However, the library does not provide them by default because the
   conversion from <code>int</code> to the base number type is not always
-  correct (think about the conversion from a 32bit integer to a single
+  correct (think about the conversion from a 32-bit integer to a single
   precision floating-point number). So the functions have been put in a
-  separate header and the user needs to include them explicitely if she wants
+  separate header and the user needs to include them explicitly if she wants
   to benefit from these mixed operators. Another point, there is no mixed
   comparison operators due to the technical way they are defined.</p>
 
