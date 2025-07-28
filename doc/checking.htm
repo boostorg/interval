@@ -22,10 +22,10 @@
   is a NaN). What to do in such a case? First, we could say that the second
   argument can never be an invalid number. Second, we could also say such a
   situation can arise but is forbidden. Third, we could allow such values and
-  generate an empty interval when encountered. And there is many other
+  generate an empty interval when encountered. And there are many other
   possibilities.</p>
 
-  <p>It is the reason why such a policy is used: there is a lot of
+  <p>It is the reason why such a policy is used: there are a lot of
   interesting behaviors and it would be sad to arbitrarily select one of
   these.</p>
 
@@ -56,19 +56,19 @@ struct checking
   value, such a value can be used.</p>
 
   <p>Next comes <code>nan</code>. This function is used each time a function
-  need to return a value of type <code>T</code> but is unable to compute it.
+  needs to return a value of type <code>T</code> but is unable to compute it.
   It only happens when one of the arguments of the function is invalid. For
   example, if you ask what the median value of an empty interval is,
   <code>nan</code> will be used. But please remember: <code>lower</code> and
   <code>upper</code> directly return the value stocked in the interval; so,
   if the interval is empty, <code>lower</code> will not answer
   <code>by</code> a call to <code>checking::nan</code> (but will return the
-  same value than <code>checking::empty_lower</code> could return).</p>
+  same value as <code>checking::empty_lower</code> could return).</p>
 
   <p><code>empty_lower</code> and <code>empty_upper</code> respectively
   return the lower and upper bound of the empty interval. There is no
-  requirements for <code>empty_lower</code> and <code>empty_upper</code> to
-  return the same value than <code>checking::nan</code>. For example, if the
+  requirement for <code>empty_lower</code> and <code>empty_upper</code> to
+  return the same value as <code>checking::nan</code>. For example, if the
   type <code>T</code> does not have any invalid value, the
   <code>empty_</code> functions can return the [1;0] interval.</p>
 
@@ -76,7 +76,7 @@ struct checking
   invalid or not. <code>is_empty</code> tests if the interval formed by the
   two arguments is empty or not. Such tests will generally be at the
   beginning of each function which involves an argument of type
-  <code>T</code>. If one of the inputs is declared invalid, the the function
+  <code>T</code>. If one of the inputs is declared invalid, the function
   will try to produce an invalid value or an input interval.</p>
 
   <h2>Synopsis</h2>
@@ -115,10 +115,10 @@ template&lt;class T&gt; struct exception_invalid_number { void operator()(); };
   <code>empty_upper</code>; and a basic test is used for <code>is_nan</code>
   (it is <code>x!=x</code>). If <code>T</code> does not have quiet NaNs, then
   <code>nan</code> is an <code>assert(false)</code>, the empty interval is
-  [1,0], and <code>is_nan</code> always return <code>false</code>. As for
+  [1,0], and <code>is_nan</code> always returns <code>false</code>. As for
   <code>nan</code>, <code>pos_inf</code> returns
   <code>numeric_limits::infinity()</code> if possible, or is an
-  <code>assert(false</code>) otherwise. <code>neg_inf</code> returns the
+  <code>assert(false)</code> otherwise. <code>neg_inf</code> returns the
   opposite. Finally, <code>is_empty(T l,T u)</code> is always defined by
   <code>!(l&lt;=u)</code>.</p>
 
@@ -171,7 +171,7 @@ template&lt;class T&gt; struct exception_invalid_number { void operator()(); };
   the conversion at the first encountered problem. So
   <code>empty_lower</code> and <code>empty_upper</code> need to return
   suitable values in order to define an empty interval (you can use an upper
-  bound which is not greater or equal than the lower bound for example); and
+  bound which is not greater or equal to the lower bound for example); and
   <code>is_empty</code> must be able to distinguish empty intervals from the
   valid intervals.</p>
 
@@ -227,7 +227,7 @@ template&lt;class T&gt; struct exception_invalid_number { void operator()(); };
     <li>If you do not mind having undefined results when an empty interval or
     an interval number is produced, your best bet is to create your own
     policy by overloading <code>checking_base</code> and modifying
-    <code>is_nan</code> et <code>is_empty</code> in order for them to always
+    <code>is_nan</code> and <code>is_empty</code> in order for them to always
     return <code>false</code>. It is probably the fastest checking policy
     available; however, it suffers from its deficient security.</li>
   </ul>
