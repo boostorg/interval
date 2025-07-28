@@ -13,14 +13,14 @@
 <body lang="en">
   <h1>Choosing Your Own Interval Type</h1>
 
-  <p>First of all, you need to select your base type. In order to obtain an
+  <p>First of all, you need to select your base type. In order to obtain a
   useful interval type, the numbers should respect some requirements. Please
   refer to <a href="numbers.htm">this page</a> in order to see them. When
   your base type is robust enough, you can go to the next step: the choice of
   the policies.</p>
 
   <p>As you should already know if you did not come to this page by accident,
-  the <code>interval</code> class expect a policies argument describing the
+  the <code>interval</code> class expects a policies argument describing the
   <a href="rounding.htm">rounding</a> and <a href="checking.htm">checking</a>
   policies. The first thing to do is to verify if the default policies are or
   are not adapted to your case. If your base type is not <code>float</code>,
@@ -31,7 +31,7 @@
 
   <p>The default policies define an interval type that performs precise
   computations (for <code>float</code>, <code>double</code>, <code>long
-  double</code>), detects invalid numbers and throws exception each times an
+  double</code>), detects invalid numbers and throws an exception each times an
   empty interval is created. This is a brief description and you should refer
   to the corresponding sections for a more precise description of the default
   policies. Unless you need some special behavior, this default type is
@@ -51,12 +51,12 @@
   <code>boost::interval&lt;double&gt;</code> is probably what you need. The
   computations are precise, and they may be fast if enclosed in a protected
   rounding mode block (see the <a href="rounding.htm#perf">performance</a>
-  section). The comparison are "certain"; it is probably the most used type
+  section). The comparisons are "certain"; it is probably the most used type
   of comparison, and the other comparisons are still accessible by the
-  explicit comparison functions. The checking forbid empty interval; they are
-  not needed since there would be an empty interval at end of the computation
+  explicit comparison functions. The checking forbids empty intervals; they are
+  not needed since there would be an empty interval at the end of the computation
   if an empty interval is created during the computation, and no root would
-  be inside. The checking also forbid invalid numbers (NaN for floating-point
+  be inside. The checking also forbids invalid numbers (NaN for floating-point
   numbers). It can be a minor performance hit if you only use exact
   floating-point constants (which are clearly not NaNs); however, if
   performance really does matter, you will probably use a good compiler which
@@ -101,7 +101,7 @@
   the computations; it is a change of the rounding policy. It also happens
   when you want to temporarily allow empty intervals to be created; it is a
   change of the checking policy. These changes should not be prohibited: they
-  can greatly enhance a program (lisibility, interest, performance).</p>
+  can greatly enhance a program (legibility, interest, performance).</p>
   <hr>
 
   <p><a href="http://validator.w3.org/check?uri=referer"><img border="0" src=
