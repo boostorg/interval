@@ -124,6 +124,10 @@ namespace detail {
   { return nextafter(x, CUDART_INF); }
   template <> inline __device__ double mid(const double &x, const double &y)
   { return __ddiv_rn(__dadd_rn(x, y), 2); }
+  template <> inline __device__ double conv_rd(const int &v)
+  { return __int2double_rn(v); }
+  template <> inline __device__ double conv_ru(const int &v)
+  { return __int2double_rn(v); }
   template <> inline __device__ double conv_rd(const long long int &v)
   { return __ll2double_rd(v); }
   template <> inline __device__ double conv_ru(const long long int &v)
@@ -170,8 +174,8 @@ template <class T, class Rounding>
 struct rounded_arith_direct : Rounding
 {
   __device__ void init() {}
-  template <class U> __device__ T conv_down(U const &v) { return detail::conv_rd(v); }
-  template <class U> __device__ T conv_up(U const &v) { return detail::conv_ru(v); }
+  template <class U> __device__ T conv_down(U const &v) { return detail::conv_rd<T>(v); }
+  template <class U> __device__ T conv_up(U const &v) { return detail::conv_ru<T>(v); }
   #define BOOST_NUMERIC_INTERVAL_new_func(a) \
     __device__ T a##_down(const T &x, const T &y) \
     { return detail::a##_rd(x, y); } \
