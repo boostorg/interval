@@ -22,7 +22,6 @@ logic
 
 core
 preprocessor
-static_assert
 type_traits
 assert
 throw_exception
