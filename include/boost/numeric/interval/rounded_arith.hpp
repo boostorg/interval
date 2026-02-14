@@ -25,25 +25,27 @@ namespace interval_lib {
 
 template<class T, class Rounding>
 struct rounded_arith_exact: Rounding {
-  void init() { }
-  template<class U> T conv_down(U const &v) { return v; }
-  template<class U> T conv_up  (U const &v) { return v; }
-  T add_down (const T& x, const T& y) { return x + y; }
-  T add_up   (const T& x, const T& y) { return x + y; }
-  T sub_down (const T& x, const T& y) { return x - y; }
-  T sub_up   (const T& x, const T& y) { return x - y; }
-  T mul_down (const T& x, const T& y) { return x * y; }
-  T mul_up   (const T& x, const T& y) { return x * y; }
-  T div_down (const T& x, const T& y) { return x / y; }
-  T div_up   (const T& x, const T& y) { return x / y; }
-  T median   (const T& x, const T& y) { return (x + y) / 2; }
-  T sqrt_down(const T& x)
+  BOOST_GPU_ENABLED void init() { }
+  template<class U>
+  BOOST_GPU_ENABLED T conv_down(U const &v) { return v; }
+  template<class U>
+  BOOST_GPU_ENABLED T conv_up  (U const &v) { return v; }
+  BOOST_GPU_ENABLED T add_down (const T& x, const T& y) { return x + y; }
+  BOOST_GPU_ENABLED T add_up   (const T& x, const T& y) { return x + y; }
+  BOOST_GPU_ENABLED T sub_down (const T& x, const T& y) { return x - y; }
+  BOOST_GPU_ENABLED T sub_up   (const T& x, const T& y) { return x - y; }
+  BOOST_GPU_ENABLED T mul_down (const T& x, const T& y) { return x * y; }
+  BOOST_GPU_ENABLED T mul_up   (const T& x, const T& y) { return x * y; }
+  BOOST_GPU_ENABLED T div_down (const T& x, const T& y) { return x / y; }
+  BOOST_GPU_ENABLED T div_up   (const T& x, const T& y) { return x / y; }
+  BOOST_GPU_ENABLED T median   (const T& x, const T& y) { return (x + y) / 2; }
+  BOOST_GPU_ENABLED T sqrt_down(const T& x)
   { BOOST_NUMERIC_INTERVAL_using_math(sqrt); return sqrt(x); }
-  T sqrt_up  (const T& x)
+  BOOST_GPU_ENABLED T sqrt_up  (const T& x)
   { BOOST_NUMERIC_INTERVAL_using_math(sqrt); return sqrt(x); }
-  T int_down (const T& x)
+  BOOST_GPU_ENABLED T int_down (const T& x)
   { BOOST_NUMERIC_INTERVAL_using_math(floor); return floor(x); }
-  T int_up   (const T& x)
+  BOOST_GPU_ENABLED T int_up   (const T& x)
   { BOOST_NUMERIC_INTERVAL_using_math(ceil); return ceil(x); }
 };
 
