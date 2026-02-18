@@ -4,7 +4,7 @@
  * implementation of the output operator. It is
  * provided for test programs that aren't even
  * interested in the precision of the results.
- * A real progam should define its own operators
+ * A real program should define its own operators
  * and never include this header.
  *
  * Copyright 2003 Guillaume Melquiond
