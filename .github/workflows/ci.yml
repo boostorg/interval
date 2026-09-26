@@ -69,10 +69,10 @@ jobs:
           - { compiler: gcc-6,     cxxstd: "11,14,17",          os: ubuntu-latest, container: "ubuntu:18.04" }
           - { compiler: gcc-7,     cxxstd: "11,14,17",          os: ubuntu-latest, container: "ubuntu:20.04" }
           - { compiler: gcc-8,     cxxstd: "11,14,17,2a",       os: ubuntu-latest, container: "ubuntu:20.04" }
-          - { compiler: gcc-9,     cxxstd: "11,14,17,2a",       os: ubuntu-22.04 }
-          - { compiler: gcc-10,    cxxstd: "11,14,17,20",       os: ubuntu-22.04 }
-          - { compiler: gcc-11,    cxxstd: "11,14,17,20",       os: ubuntu-22.04 }
-          - { compiler: gcc-12,    cxxstd: "11,14,17,20",       os: ubuntu-22.04 }
+          - { compiler: gcc-9,     cxxstd: "11,14,17,2a",       os: ubuntu-latest, container: "ubuntu:22.04" }
+          - { compiler: gcc-10,    cxxstd: "11,14,17,20",       os: ubuntu-latest, container: "ubuntu:22.04" }
+          - { compiler: gcc-11,    cxxstd: "11,14,17,20",       os: ubuntu-latest, container: "ubuntu:22.04" }
+          - { compiler: gcc-12,    cxxstd: "11,14,17,20",       os: ubuntu-latest, container: "ubuntu:22.04" }
           - { compiler: gcc-13,    cxxstd: "11,14,17,20,2b",    os: ubuntu-24.04 }
           - { name: "Coverage w/ GCC on Linux", coverage: "yes",
               compiler: gcc-13,    cxxstd: "2b",                os: ubuntu-24.04, install: "g++-13-multilib gcc-multilib", address-model: "32,64" }
@@ -335,7 +335,7 @@ jobs:
   coverity:
     name: Coverity Scan w/ Clang on Linux
     if: github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'master')
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 120
 
     defaults:
@@ -354,7 +354,7 @@ jobs:
         if: env.COVERITY_SCAN_TOKEN
         run: |
             sudo apt-get -o Acquire::Retries=$NET_RETRY_COUNT update
-            sudo apt-get -o Acquire::Retries=$NET_RETRY_COUNT -y -q --no-install-suggests --no-install-recommends install clang-12
+            sudo apt-get -o Acquire::Retries=$NET_RETRY_COUNT -y -q --no-install-suggests --no-install-recommends install clang-18
 
       - name: Setup Boost
         if: env.COVERITY_SCAN_TOKEN
@@ -371,7 +371,7 @@ jobs:
             cp -r "$GITHUB_WORKSPACE"/* "libs/$SELF/"
             $(command -v python || command -v python3) tools/boostdep/depinst/depinst.py --include benchmark --include example --include examples --include tools --git_args "--jobs $GIT_FETCH_JOBS" "$SELF"
             echo "BOOST_ROOT=$PWD" >> "$GITHUB_ENV"
-            echo "using clang : : clang++-12 ;" > ~/user-config.jam
+            echo "using clang : : clang++-18 ;" > ~/user-config.jam
             ./bootstrap.sh
             ./b2 -d0 headers
 
@@ -387,7 +387,7 @@ jobs:
             popd
             RESULTS_DIR="$(pwd)/cov-int"
             mkdir "${RESULTS_DIR}"
-            cov-configure --template --compiler clang++-12 --comptype clangcxx
+            cov-configure --template --compiler clang++-18 --comptype clangcxx
             (cd "$BOOST_ROOT" && cov-build --dir "${RESULTS_DIR}" ./b2 libs/$SELF/test toolset=clang cxxstd=20 link=$B2_LINK variant=$B2_VARIANT -j3)
             tail -50 "${RESULTS_DIR}/build-log.txt"
             tar czf cov-int.tgz cov-int
