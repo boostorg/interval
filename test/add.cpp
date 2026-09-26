@@ -15,8 +15,7 @@
 #include <boost/numeric/interval/utility.hpp>
 #include <boost/numeric/interval/policies.hpp>
 #include <boost/core/lightweight_test.hpp>
-#include <memory>
-#include <vector>
+#include <algorithm>
 #include <cstddef>
 #include "bugs.hpp"
 
@@ -27,6 +26,9 @@ struct pexpr {
   expr *ptr;
   expr* operator->() const { return ptr; }
   pexpr(expr *p = NULL): ptr(p) { }
+  pexpr(const pexpr& o);
+  pexpr& operator=(pexpr o) { std::swap(ptr, o.ptr); return *this; }
+  ~pexpr();
 };
 
 struct expr {
@@ -36,26 +38,13 @@ struct expr {
   pexpr e1, e2;
 };
 
-// Every expr node is owned by this pool and released at program exit,
-// so sanitizer builds do not report the symbolic trees as leaks.
-struct expr_pool {
-  std::vector<expr*> nodes;
-  ~expr_pool() {
-    for (std::size_t i = 0; i < nodes.size(); ++i) delete nodes[i];
-  }
-};
-
-static expr_pool pool;
-
-static pexpr new_expr(e_type t) {
-  expr *p = new expr;
-  p->type = t;
-  pool.nodes.push_back(p);
-  return p;
-}
+// Each pexpr owns its node, and copying one clones the subtree.
+pexpr::pexpr(const pexpr& o): ptr(o.ptr ? new expr(*o.ptr) : NULL) { }
+pexpr::~pexpr() { delete ptr; }
 
 pexpr var(int v) {
-  pexpr e = new_expr(EXPR_VAR);
+  pexpr e = new expr();
+  e->type = EXPR_VAR;
   e->var = v;
   return e;
 }
@@ -68,7 +57,8 @@ pexpr operator+(pexpr a, pexpr b) {
   if (a->type == EXPR_NEG) return b - a->e;
   if (b->type == EXPR_NEG) return a - b->e;
   if (a->type == EXPR_VAR && b->type == EXPR_VAR && a->var > b->var) return b + a;
-  pexpr c = new_expr(EXPR_ADD);
+  pexpr c = new expr();
+  c->type = EXPR_ADD;
   c->e1 = a;
   c->e2 = b;
   return c;
@@ -76,20 +66,23 @@ pexpr operator+(pexpr a, pexpr b) {
 
 pexpr operator-(pexpr a, pexpr b) {
   if (b->type == EXPR_NEG) return a + b->e;
-  pexpr c = new_expr(EXPR_SUB);
+  pexpr c = new expr();
+  c->type = EXPR_SUB;
   c->e1 = a;
   c->e2 = b;
   return c;
 }
 
 pexpr down(pexpr a) {
-  pexpr e = new_expr(EXPR_DOWN);
+  pexpr e = new expr();
+  e->type = EXPR_DOWN;
   e->e = a;
   return e;
 }
 
 pexpr up(pexpr a) {
-  pexpr e = new_expr(EXPR_UP);
+  pexpr e = new expr();
+  e->type = EXPR_UP;
   e->e = a;
   return e;
 }
@@ -100,7 +93,8 @@ pexpr operator-(pexpr a) {
   if (a->type == EXPR_DOWN) return up(-a->e);
   if (a->type == EXPR_SUB) return a->e2 - a->e1;
   if (a->type == EXPR_ADD) return -a->e1 - a->e2;
-  pexpr e = new_expr(EXPR_NEG);
+  pexpr e = new expr();
+  e->type = EXPR_NEG;
   e->e = a;
   return e;
 }
