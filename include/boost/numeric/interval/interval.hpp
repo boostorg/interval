@@ -13,22 +13,10 @@
 #include <stdexcept>
 #include <string>
 #include <boost/numeric/interval/detail/interval_prototype.hpp>
+#include <boost/numeric/interval/detail/comparison_error.hpp>
 
 namespace boost {
 namespace numeric {
-
-namespace interval_lib {
-    
-class comparison_error
-  : public std::runtime_error 
-{
-public:
-  comparison_error()
-    : std::runtime_error("boost::interval: uncertain comparison")
-  { }
-};
-
-} // namespace interval_lib
 
 /*
  * interval class
