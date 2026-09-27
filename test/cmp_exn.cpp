@@ -32,7 +32,7 @@ typedef boost::numeric::interval_lib::policies< empty_class, my_checking >
 typedef boost::numeric::interval<int, my_policies> I;
 
 #define BOOST_C_EXN(e) \
-  BOOST_TEST_THROWS(e, boost::numeric::interval_lib::comparison_error)
+  BOOST_TEST_THROWS((void)(e), boost::numeric::interval_lib::comparison_error)
 
 static void test_cer()
 {

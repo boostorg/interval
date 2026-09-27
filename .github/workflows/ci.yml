@@ -1,20 +1,25 @@
-#
 # Copyright 2020-2021 Peter Dimov
 # Copyright 2021 Andrey Semashev
-# Copyright 2021-2024 Alexander Grund
+# Copyright 2021-2026 Alexander Grund
 # Copyright 2022-2025 James E. King III
+# Copyright 2026 Sayan
 #
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at http://boost.org/LICENSE_1_0.txt)
 #
-# This workflow uses the Boost.CI reusable workflow which builds a variety of
-# configurations of your project, runs tests, and generates code coverage reports.
-#
-# To use it, copy this file into your repository as `.github/workflows/ci.yml` and
-# customize it appropriately.
-# 
+# Self-contained CI.  It runs the same jobs on the same platforms as the
+# Boost.CI reusable workflow this repository used before, with the settings
+# it passed to it:
+#   - MinGW disabled (https://github.com/boostorg/interval/issues/41)
+#   - clang before 11 excluded: clang < 10 does not support the necessary
+#     floating point options (-frounding-math) and clang 10 has a C++20
+#     ambiguous operator resolution bug
+#     (https://github.com/llvm/llvm-project/issues/43110)
 ---
-name: Boost.CI
+name: CI
+
+permissions:
+  contents: read
 
 on:
   pull_request:
@@ -31,18 +36,575 @@ on:
       - meta/**
       - README.md
 
+concurrency:
+  group: ${{ github.ref }}:${{ github.workflow_ref }}
+  cancel-in-progress: true
+
+env:
+  SELF: numeric/interval
+  GIT_FETCH_JOBS: 8
+  NET_RETRY_COUNT: 5
+  B2_LINK: shared,static
+  B2_VARIANT: debug,release
+
 jobs:
-  call-boost-ci:
-    name: Run Boost.CI
-    uses: boostorg/boost-ci/.github/workflows/reusable.yml@master
-    with:
-      # https://github.com/boostorg/interval/issues/41
-      # Boost.CI doesn't have a way to only disable MINGW32 at this time
-      enable_mingw: false
-      # clang before 10.0 does not support the necessary floating point options (-frounding-math)
-      # clang 10.0 has a C++20 ambiguous operator resolution bug: https://github.com/llvm/llvm-project/issues/43110
-      exclude_compiler: 'clang-3.5,clang-3.6,clang-3.7,clang-3.8,clang-3.9,clang-4.0,clang-5.0,clang-6.0,clang-7,clang-8,clang-9,clang-10'
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  posix:
+    name: posix (${{ matrix.name || matrix.compiler }}, ${{ matrix.cxxstd }}, ${{ matrix.container || matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+
+    defaults:
+      run:
+        shell: bash
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # libstdc++
+          - { compiler: gcc-4.7,   cxxstd: "11",                os: ubuntu-latest, container: "ubuntu:16.04" }
+          - { compiler: gcc-4.8,   cxxstd: "11",                os: ubuntu-latest, container: "ubuntu:16.04" }
+          - { compiler: gcc-4.9,   cxxstd: "11",                os: ubuntu-latest, container: "ubuntu:16.04" }
+          - { compiler: gcc-5,     cxxstd: "11,14,1z",          os: ubuntu-latest, container: "ubuntu:18.04" }
+          - { compiler: gcc-6,     cxxstd: "11,14,17",          os: ubuntu-latest, container: "ubuntu:18.04" }
+          - { compiler: gcc-7,     cxxstd: "11,14,17",          os: ubuntu-latest, container: "ubuntu:20.04" }
+          - { compiler: gcc-8,     cxxstd: "11,14,17,2a",       os: ubuntu-latest, container: "ubuntu:20.04" }
+          - { compiler: gcc-9,     cxxstd: "11,14,17,2a",       os: ubuntu-latest, container: "ubuntu:22.04" }
+          - { compiler: gcc-10,    cxxstd: "11,14,17,20",       os: ubuntu-latest, container: "ubuntu:22.04" }
+          - { compiler: gcc-11,    cxxstd: "11,14,17,20",       os: ubuntu-latest, container: "ubuntu:22.04" }
+          - { compiler: gcc-12,    cxxstd: "11,14,17,20",       os: ubuntu-latest, container: "ubuntu:22.04" }
+          - { compiler: gcc-13,    cxxstd: "11,14,17,20,2b",    os: ubuntu-24.04 }
+          - { name: "Coverage w/ GCC on Linux", coverage: "yes",
+              compiler: gcc-13,    cxxstd: "2b",                os: ubuntu-24.04, install: "g++-13-multilib gcc-multilib", address-model: "32,64" }
+          - { name: "GCC w/ sanitizers", sanitize: "yes",
+              compiler: gcc-13,    cxxstd: "11,14,17,20",       os: ubuntu-24.04 }
+          - { compiler: gcc-14,    cxxstd: "11,14,17,20,23",    os: ubuntu-24.04 }
+          - { compiler: gcc-15,    cxxstd: "11,14,17,20,23,2c", os: ubuntu-latest, container: "ubuntu:26.04" }
+          - { compiler: gcc-16,    cxxstd: "11,14,17,20,23,26", os: ubuntu-latest, container: "ubuntu:26.04" }
+          - { compiler: clang-11,  cxxstd: "11,14,17,20",       os: ubuntu-latest, container: "ubuntu:20.04" }
+          - { compiler: clang-12,  cxxstd: "11,14,17,20",       os: ubuntu-latest, container: "ubuntu:20.04" }
+          - { compiler: clang-13,  cxxstd: "11,14,17,20",       os: ubuntu-latest, container: "ubuntu:22.04" }
+          - { compiler: clang-14,  cxxstd: "11,14,17,20",       os: ubuntu-latest, container: "ubuntu:22.04" }
+          - { compiler: clang-15,  cxxstd: "11,14,17,20",       os: ubuntu-latest, container: "ubuntu:22.04" }
+          - { compiler: clang-16,  cxxstd: "11,14,17,20,2b",    os: ubuntu-latest, container: "ubuntu:24.04" }
+          - { compiler: clang-17,  cxxstd: "11,14,17,20,23",    os: ubuntu-latest, container: "ubuntu:24.04" }
+          - { compiler: clang-18,  cxxstd: "11,14,17,20,23,2c", os: ubuntu-24.04 }
+          - { compiler: clang-19,  cxxstd: "11,14,17,20,23,2c", os: ubuntu-24.04 }
+          - { compiler: clang-20,  cxxstd: "11,14,17,20,23,2c", os: ubuntu-latest, container: "ubuntu:25.04" }
+          - { compiler: clang-21,  cxxstd: "11,14,17,20,23,2c", os: ubuntu-latest, container: "ubuntu:26.04" }
+          - { compiler: clang-22,  cxxstd: "11,14,17,20,23,2c", os: ubuntu-latest, container: "ubuntu:26.04" }
+          - { compiler: icpx-2025, cxxstd: "11,14,17,20,23,2c", os: ubuntu-latest, container: "intel/oneapi-hpckit:2025.2.2-0-devel-ubuntu24.04" }
+          # libc++
+          - { name: "Clang w/ sanitizers", sanitize: "yes", stdlib: "libc++",
+              compiler: clang-12,  cxxstd: "11,14,17,20",       os: ubuntu-latest, container: "ubuntu:20.04" }
+          # MacOS
+          - { name: "MacOS sanitize w/ clang", sanitize: "yes",
+              compiler: clang,     cxxstd: "11,14,17,20,2b",    os: macos-14 }
+          - { compiler: clang-16,  cxxstd: "11,14,17,20,2b",    os: macos-15, xcode_app: "Xcode_16.2" }
+          - { compiler: clang-18,  cxxstd: "11,14,17,20,2b",    os: macos-15 }
+          - { compiler: clang-20,  cxxstd: "11,14,17,20,23,2c", os: macos-26 }
+          # Arm64
+          - { name: "ARM64 w/ GCC",
+              compiler: gcc-13,    cxxstd: "11,14,17,20,2b",    os: ubuntu-24.04-arm }
+          # Big-Endian
+          - { name: "Big Endian w/ Clang on s390x", multiarch: "yes",
+              compiler: clang,     cxxstd: "17",                os: ubuntu-latest, distro: fedora, edition: "34", arch: s390x }
+
+    container:
+      image: ${{ matrix.container }}
+      volumes:
+        - /node20_217:/node20_217:rw,rshared
+        - /node24_217:/node24_217:rw,rshared
+        - ${{ startsWith(matrix.container, 'ubuntu:1') && '/node20_217:/__e/node20:ro,rshared' || ' ' }}
+        - ${{ startsWith(matrix.container, 'ubuntu:1') && '/node24_217:/__e/node24:ro,rshared' || ' ' }}
+
+    steps:
+      - name: Setup environment
+        run: |
+            if [ -f "/etc/debian_version" ]; then
+                echo "DEBIAN_FRONTEND=noninteractive" >> "$GITHUB_ENV"
+                export DEBIAN_FRONTEND=noninteractive
+            fi
+            if [ -n "${{ matrix.container }}" ] && [ -f "/etc/debian_version" ]; then
+                echo "::group::Install core tools"
+                apt-get -o Acquire::Retries=$NET_RETRY_COUNT update
+                apt-get -o Acquire::Retries=$NET_RETRY_COUNT -y -q --no-install-suggests --no-install-recommends install sudo software-properties-common curl
+                echo "::endgroup::"
+                echo "::group::Check & setup git version"
+                if ! git_version=$(git --version 2>/dev/null); then
+                    git_version=0.0.0
+                fi
+                # Extract version number from e.g. "git version 2.7.4"
+                version=${git_version##* }
+                echo "Git version: $version"
+                required_git_version="2.18" # actions/checkout requires git 2.18
+                if [[ "$(printf '%s\n' "$required_git_version" "$version" | sort -V | head -n1)" != "$required_git_version" ]]; then
+                    # Need (newer) git, and the older Ubuntu container may require requesting the key manually using port 80
+                    key_server="keyserver.boost.org"
+                    echo "Downloading key from $key_server"
+                    curl -sSL --retry ${NET_RETRY_COUNT:-5} "https://$key_server/pks/lookup?op=get&search=0xF911AB184317630C59970973E363C90F8F1B6217" | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/git-core_ubuntu_ppa.gpg
+                    VERSION_CODENAME=$(grep -ioP '^VERSION_CODENAME=\K.+' /etc/os-release || true)
+                    echo "VERSION_CODENAME is ${VERSION_CODENAME}"
+                    echo "deb http://ppa.launchpadcontent.net/git-core/ppa/ubuntu ${VERSION_CODENAME} main" | sudo tee /etc/apt/sources.list.d/git-core-ppa.list > /dev/null
+                fi
+                echo "::endgroup::"
+                echo "::group::Update APT cache"
+                apt-get -o Acquire::Retries=$NET_RETRY_COUNT update
+                echo "::endgroup::"
+                pkgs="g++ git xz-utils"
+                osver=$(lsb_release -sr | cut -f1 -d.)
+                echo "OS version: $osver"
+                # Ubuntu 22+ has only Python 3 in the repos
+                if [ -n "$osver" ] && [ "$osver" -ge "20" ]; then
+                  pkgs+=" python-is-python3 libpython3-dev"
+                else
+                  pkgs+=" python libpython-dev"
+                fi
+                echo "::group::Install $pkgs"
+                apt-get -o Acquire::Retries=$NET_RETRY_COUNT -y -q --no-install-suggests --no-install-recommends install $pkgs
+                echo "::endgroup::"
+            fi
+            git config --global pack.threads 0
+            if [[ "${{ matrix.container }}" == "ubuntu:1"* ]]; then
+              echo "::group::Update node"
+              # Install a node version that works with the glibc 2.17 of Ubuntu 16/18: https://github.com/actions/checkout/issues/1590
+              curl -sL https://archives.boost.io/misc/node/node-v20.9.0-linux-x64-glibc-217.tar.xz | tar -xJ --strip-components 1 -C /node20_217
+              # Node 24 triggers a bug in GLIBC 2.17 inside libnss_files.so.2 leading to a SIGSEGV, use Node 20 for both
+              mkdir -p /node24_217
+              cp -r /node20_217/* /node24_217/
+              echo "::endgroup::"
+            fi
+
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          # For coverage builds fetch the whole history, else only 1 commit
+          fetch-depth: ${{ matrix.coverage && '0' || '1' }}
+
+      - name: Install packages
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            sudo apt-get -o Acquire::Retries=$NET_RETRY_COUNT update
+            if [[ -z "${{ matrix.install }}" ]]; then
+                if [[ ! "${{ matrix.compiler }}" =~ icpx ]]; then
+                    compiler="${{ matrix.compiler }}"
+                    pkgs="${compiler/gcc-/g++-}"
+                    if [[ "${{ matrix.stdlib }}" == "libc++" && $compiler == "clang-"* ]]; then
+                        ver=${compiler#*-}
+                        pkgs+=" libc++-${ver}-dev libc++abi-${ver}-dev"
+                    fi
+                fi
+            else
+                pkgs="${{ matrix.install }}"
+            fi
+            if [ -n "${pkgs}" ]; then
+                sudo apt-get -o Acquire::Retries=$NET_RETRY_COUNT -y -q --no-install-suggests --no-install-recommends install $pkgs
+            fi
+
+      - name: Setup multiarch
+        if: matrix.multiarch
+        run: |
+            sudo apt-get -o Acquire::Retries=$NET_RETRY_COUNT -y -q --no-install-suggests --no-install-recommends install binfmt-support qemu-user-static
+            git clone --depth=1 https://github.com/jeking3/bdde.git ../bdde
+            sudo ../bdde/bin/linux/bdde-multiarch
+            sudo ../bdde/bin/linux/bdde-multiarch --version
+            echo "$(cd ../bdde/bin/linux && pwd)" >> "$GITHUB_PATH"
+            echo "B2_WRAPPER=bdde" >> "$GITHUB_ENV"
+        env:
+          BDDE_DISTRO: ${{ matrix.distro }}
+          BDDE_EDITION: ${{ matrix.edition }}
+          BDDE_ARCH: ${{ matrix.arch }}
+
+      - name: Setup Boost
+        run: |
+            set -x
+            # Required because inside a container the owner is root so git commands would fail.
+            git config --global --add safe.directory "$GITHUB_WORKSPACE" || true
+            if [ -n "${{ matrix.xcode_app }}" ]; then
+                sudo xcode-select -switch "/Applications/${{ matrix.xcode_app }}.app"
+            fi
+
+            REF=${GITHUB_BASE_REF:-$GITHUB_REF}
+            REF=${REF##*/}
+            BOOST_BRANCH=develop && [ "$REF" == "master" ] && BOOST_BRANCH=master || true
+            cd ..
+            git clone -b $BOOST_BRANCH --depth 1 https://github.com/boostorg/boost.git boost-root
+            cd boost-root
+            git submodule update -q --init tools/boostdep
+            rm -rf "libs/$SELF" && mkdir -p "libs/$SELF"
+            cp -r "$GITHUB_WORKSPACE"/* "libs/$SELF/"
+            $(command -v python || command -v python3) tools/boostdep/depinst/depinst.py --include benchmark --include example --include examples --include tools --git_args "--jobs $GIT_FETCH_JOBS" "$SELF"
+            echo "BOOST_ROOT=$PWD" >> "$GITHUB_ENV"
+
+            # Toolset and compiler for user-config.jam
+            compiler="${{ matrix.compiler }}"
+            if [[ "$compiler" =~ clang ]]; then
+                B2_TOOLSET=clang
+                CXX="${compiler/clang/clang++}"
+                # On macOS use the system clang if it is the requested version, else the HomeBrew one
+                if [[ "$RUNNER_OS" == "macOS" ]] && [[ "$compiler" == clang-* ]] && ! command -v "$CXX"; then
+                    ver=${compiler#clang-}
+                    if [[ "$(clang --version)" == *"clang version ${ver}."* ]]; then
+                        CXX=clang++
+                    else
+                        CXX="$(brew --prefix "llvm@$ver")/bin/clang++"
+                    fi
+                fi
+            elif [[ "$compiler" =~ icpx ]]; then
+                B2_TOOLSET=intel-linux
+                CXX=icpx
+            else
+                B2_TOOLSET=gcc
+                CXX="${compiler/gcc/g++}"
+            fi
+            command -v "$CXX"
+            "$CXX" --version
+            echo "using $B2_TOOLSET : : $CXX ;" > ~/user-config.jam
+            cat ~/user-config.jam
+            echo "B2_TOOLSET=$B2_TOOLSET" >> "$GITHUB_ENV"
+            # CXX in the environment would override B2's toolset
+            echo "CXX=" >> "$GITHUB_ENV"
+
+            ${B2_WRAPPER:-} ./bootstrap.sh
+            ${B2_WRAPPER:-} ./b2 -d0 headers
+        env:
+          BDDE_DISTRO: ${{ matrix.distro }}
+          BDDE_EDITION: ${{ matrix.edition }}
+          BDDE_ARCH: ${{ matrix.arch }}
+
+      - name: Run tests
+        if: '!matrix.coverage'
+        run: |
+            set -x
+            cd "$BOOST_ROOT"
+            ARGS=(toolset=$B2_TOOLSET cxxstd=${{ matrix.cxxstd }} link=$B2_LINK variant=$B2_VARIANT -j$(( $(getconf _NPROCESSORS_ONLN) + 1 )))
+            [ -z "${{ matrix.address-model }}" ] || ARGS+=(address-model=${{ matrix.address-model }})
+            [ -z "${{ matrix.stdlib }}" ] || ARGS+=(stdlib=${{ matrix.stdlib }})
+            [ "${{ matrix.sanitize }}" != "yes" ] || ARGS+=(address-sanitizer=norecover undefined-sanitizer=norecover)
+            ${B2_WRAPPER:-} ./b2 libs/$SELF/test "${ARGS[@]}"
+        env:
+          UBSAN_OPTIONS: print_stacktrace=1,report_error_type=1
+          BDDE_DISTRO: ${{ matrix.distro }}
+          BDDE_EDITION: ${{ matrix.edition }}
+          BDDE_ARCH: ${{ matrix.arch }}
+
+      - name: Run tests with coverage
+        if: matrix.coverage
+        run: |
+            set -x
+            cd "$BOOST_ROOT"
+            ./b2 libs/$SELF/test toolset=$B2_TOOLSET cxxstd=${{ matrix.cxxstd }} link=$B2_LINK variant=debug \
+                address-model=${{ matrix.address-model }} "cxxflags=-fkeep-static-functions --coverage" linkflags=--coverage \
+                -j$(( $(getconf _NPROCESSORS_ONLN) + 1 ))
+
+      - name: Show config.log
+        if: always()
+        run: cat "$BOOST_ROOT/bin.v2/config.log" || true
+
+      - name: Collect coverage
+        if: matrix.coverage
+        run: |
+            set -x
+            GCOV=gcov-${{ matrix.compiler }}
+            GCOV=${GCOV/gcc-/}
+            sudo apt-get -o Acquire::Retries=$NET_RETRY_COUNT -y -q --no-install-suggests --no-install-recommends install \
+                libcapture-tiny-perl libdatetime-perl libjson-xs-perl || true
+            LCOV_OPTIONS=(--rc branch_coverage=1 --ignore-errors inconsistent,mismatch,unused)
+            rm -rf /tmp/lcov
+            git clone --depth 1 -b v2.3 https://github.com/linux-test-project/lcov.git /tmp/lcov
+            export PATH=/tmp/lcov/bin:$PATH
+            lcov --version
+            lcov "${LCOV_OPTIONS[@]}" --gcov-tool="$GCOV" --directory "$BOOST_ROOT" --capture --output-file all.info
+            lcov "${LCOV_OPTIONS[@]}" --list all.info
+            # Limit to this library: its headers and libs/$SELF
+            for f in $(for h in include/boost/*; do echo "$h"; done | cut -f2- -d/); do echo "*/$f*"; done > /tmp/interesting
+            cat /tmp/interesting
+            xargs --verbose -L 999999 -a /tmp/interesting lcov "${LCOV_OPTIONS[@]}" --extract all.info "*/libs/$SELF/*" --output-file coverage.info
+            lcov "${LCOV_OPTIONS[@]}" --list coverage.info
+
+      - name: Upload coverage
+        if: matrix.coverage
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        with:
+          fail_ci_if_error: true
+          disable_search: true
+          files: coverage.info
+          name: Github Actions (POSIX)
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+
+  coverity:
+    name: Coverity Scan w/ Clang on Linux
+    if: github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'master')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    defaults:
+      run:
+        shell: bash
+
+    env:
       COVERITY_SCAN_NOTIFICATION_EMAIL: ${{ secrets.COVERITY_SCAN_NOTIFICATION_EMAIL }}
       COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        if: env.COVERITY_SCAN_TOKEN
+
+      - name: Install packages
+        if: env.COVERITY_SCAN_TOKEN
+        run: |
+            sudo apt-get -o Acquire::Retries=$NET_RETRY_COUNT update
+            sudo apt-get -o Acquire::Retries=$NET_RETRY_COUNT -y -q --no-install-suggests --no-install-recommends install clang-18
+
+      - name: Setup Boost
+        if: env.COVERITY_SCAN_TOKEN
+        run: |
+            set -x
+            REF=${GITHUB_BASE_REF:-$GITHUB_REF}
+            REF=${REF##*/}
+            BOOST_BRANCH=develop && [ "$REF" == "master" ] && BOOST_BRANCH=master || true
+            cd ..
+            git clone -b $BOOST_BRANCH --depth 1 https://github.com/boostorg/boost.git boost-root
+            cd boost-root
+            git submodule update -q --init tools/boostdep
+            rm -rf "libs/$SELF" && mkdir -p "libs/$SELF"
+            cp -r "$GITHUB_WORKSPACE"/* "libs/$SELF/"
+            $(command -v python || command -v python3) tools/boostdep/depinst/depinst.py --include benchmark --include example --include examples --include tools --git_args "--jobs $GIT_FETCH_JOBS" "$SELF"
+            echo "BOOST_ROOT=$PWD" >> "$GITHUB_ENV"
+            echo "using clang : : clang++-18 ;" > ~/user-config.jam
+            ./bootstrap.sh
+            ./b2 -d0 headers
+
+      - name: Run coverity
+        if: env.COVERITY_SCAN_TOKEN
+        run: |
+            set -x
+            pushd /tmp
+            rm -rf coverity_tool.tgz cov-analysis*
+            curl -L -d "token=${COVERITY_SCAN_TOKEN}&project=${GITHUB_REPOSITORY}" -X POST https://scan.coverity.com/download/cxx/linux64 -o coverity_tool.tgz
+            tar xzf coverity_tool.tgz
+            export PATH=$(echo "$(pwd)"/cov-analysis*/bin):$PATH
+            popd
+            RESULTS_DIR="$(pwd)/cov-int"
+            mkdir "${RESULTS_DIR}"
+            cov-configure --template --compiler clang++-18 --comptype clangcxx
+            (cd "$BOOST_ROOT" && cov-build --dir "${RESULTS_DIR}" ./b2 libs/$SELF/test toolset=clang cxxstd=20 link=$B2_LINK variant=$B2_VARIANT -j3)
+            tail -50 "${RESULTS_DIR}/build-log.txt"
+            tar czf cov-int.tgz cov-int
+            curl --form token="${COVERITY_SCAN_TOKEN}" \
+                 --form email="${COVERITY_SCAN_NOTIFICATION_EMAIL}" \
+                 --form file=@cov-int.tgz \
+                 --form version="${GITHUB_REF_NAME}" \
+                 --form description="${GITHUB_REPOSITORY}:${GITHUB_REF}:${GITHUB_SHA}:${GITHUB_RUN_NUMBER}" \
+                 https://scan.coverity.com/builds?project="${GITHUB_REPOSITORY}"
+
+  windows:
+    name: windows (${{ matrix.name || matrix.toolset }}, ${{ matrix.cxxstd }}, ${{ matrix.address-model }}, ${{ matrix.os }}${{ matrix.target-os && ', cygwin' || '' }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+
+    defaults:
+      run:
+        shell: cmd
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { toolset: msvc-14.3, cxxstd: "14,17,20,latest", address-model: "32,64", os: windows-2022 }
+          - { toolset: msvc-14.5, cxxstd: "14,17,20,latest", address-model: "32,64", os: windows-2025-vs2026 }
+          - { toolset: msvc,      cxxstd: "14,17,20,latest", address-model: "64",    os: windows-11-arm }
+          - { name: "Collect coverage w/ VS 2022", coverage: "yes",
+              toolset: msvc-14.3, cxxstd: "latest",          address-model: "64",    os: windows-2022 }
+          - { name: "Collect coverage w/ VS 2026", coverage: "yes",
+              toolset: msvc-14.5, cxxstd: "latest",          address-model: "64",    os: windows-2025-vs2026 }
+          - { toolset: clang-win, cxxstd: "14,17,latest",    address-model: "32,64", os: windows-2025, b2_flags: "embed-manifest-via=linker" }
+          - { toolset: gcc,       cxxstd: "11,14,17,2a",     address-model: "64",    os: windows-2022 }
+          - { toolset: gcc,       cxxstd: "11,14,17,2a",     address-model: "32",    os: windows-2025, target-os: cygwin }
+          - { toolset: gcc,       cxxstd: "11,14,17,2a",     address-model: "64",    os: windows-2025, target-os: cygwin }
+
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup cygwin
+        if: ${{ matrix.target-os == 'cygwin' }}
+        uses: cygwin/cygwin-install-action@3f0a3f9f988f7e96b8c18098ae05eaec175f5b52 # v6.1
+        with:
+          site: ${{ matrix.address-model == '64' && 'https://www.mirrorservice.org/sites/sourceware.org/pub/cygwin' || 'https://ftp-stud.hs-esslingen.de/pub/Mirrors/sources.redhat.com/cygwin-archive/20221123' }}
+          packages: coreutils, gcc-g++, libstdc++6, make, moreutils, openssl, libbz2-devel, libgmp-devel, libicu-devel, libjpeg-devel, libmpfr-devel, libpng-devel, libssl-devel, libtiff-devel, libxslt-devel, libzstd-devel
+          platform: ${{ matrix.address-model == '64' && 'x86_64' || 'x86' }}
+
+      - name: Setup Boost
+        run: |
+            set BOOST_BRANCH=develop
+            if "%GITHUB_BASE_REF%" == "" (set TARGET_BRANCH=%GITHUB_REF%) else (set TARGET_BRANCH=%GITHUB_BASE_REF%)
+            for /f %%i in ("%TARGET_BRANCH%") do if "%%~nxi" == "master" set BOOST_BRANCH=master
+            echo BOOST_BRANCH: %BOOST_BRANCH%
+            cd .. || exit /b 1
+            git clone -b %BOOST_BRANCH% --depth 1 https://github.com/boostorg/boost.git boost-root || exit /b 1
+            cd boost-root || exit /b 1
+            git submodule update -q --init tools/boostdep || exit /b 1
+            xcopy /s /e /q /I %GITHUB_WORKSPACE% libs\numeric\interval || exit /b 1
+            python tools/boostdep/depinst/depinst.py --include benchmark --include example --include examples --include tools --git_args "--jobs %GIT_FETCH_JOBS%" %SELF% || exit /b 1
+            echo BOOST_ROOT=%cd%>> %GITHUB_ENV%
+            cmd /c bootstrap
+            if not %ERRORLEVEL% == 0 (type bootstrap.log & exit /b 1)
+            b2 -d0 headers
+
+      - name: Run tests
+        if: '!matrix.coverage'
+        run: |
+            cd /d %BOOST_ROOT%
+            b2 --abbreviate-paths libs/%SELF%/test toolset=${{ matrix.toolset }} cxxstd=${{ matrix.cxxstd }} address-model=${{ matrix.address-model }} ${{ matrix.target-os && format('target-os={0}', matrix.target-os) || '' }} link=%B2_LINK% variant=%B2_VARIANT% -j3 ${{ matrix.b2_flags }}
+
+      - name: Collect coverage
+        if: matrix.coverage
+        shell: powershell
+        run: |
+            choco install opencppcoverage
+            $env:Path += ";C:\Program Files\OpenCppCoverage"
+            mkdir __out
+            # Run b2 from a batch file: OpenCppCoverage quotes each argument, which breaks an inline "cd && b2"
+            Set-Content -Path __out\run_tests.bat -Value "cd /d ${env:BOOST_ROOT} && b2 --abbreviate-paths libs/${env:SELF}/test toolset=${{ matrix.toolset }} cxxstd=${{ matrix.cxxstd }} address-model=${{ matrix.address-model }} link=${env:B2_LINK} variant=debug -j3"
+            $cmd ='OpenCppCoverage.exe --export_type cobertura:__out/cobertura.xml --modules "{0}" ' -f ${env:BOOST_ROOT}
+            $cmd += (Get-ChildItem -Name "${env:GITHUB_WORKSPACE}\include\boost").ForEach({'--sources "boost\{0}"' -f $_}) -join " "
+            $cmd += " --sources ${env:BOOST_ROOT}\libs\numeric\interval "
+            $exclusions = @(
+              # Lines marked with LCov or coverity exclusion comments
+              '.*// LCOV_EXCL_LINE'
+              '.*// coverity\[dead_error_line\]'
+              # Lines containing only braces
+              '\s*[}{]*\s*'
+              # Lines containing only else (and opt. braces)
+              '\s*(\} )?else( \{)?\s*'
+            )
+            $cmd += $exclusions.ForEach({"--excluded_line_regex '{0}'" -f $_}) -join " "
+            $cmd += " --cover_children -- cmd.exe /c ${PWD}\__out\run_tests.bat"
+            $cmd
+            Invoke-Expression $cmd
+
+      - name: Upload coverage
+        if: matrix.coverage
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        with:
+          disable_search: true
+          files: __out/cobertura.xml
+          name: Github Actions (Windows)
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+
+  cmake:
+    name: cmake (${{ matrix.name && format('{0}, ', matrix.name) || '' }}${{ matrix.os }}, ${{ matrix.build_shared }}, ${{ matrix.build_type }}, ${{ matrix.generator }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+
+    defaults:
+      run:
+        shell: bash
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,       build_shared: "ON",  build_type: Debug, generator: "Unix Makefiles" }
+          - { os: ubuntu-latest,       build_shared: "OFF", build_type: Debug, generator: "Unix Makefiles" }
+          - { os: windows-2022,        build_shared: "ON",  build_type: Debug, generator: "Visual Studio 17 2022" }
+          - { os: windows-2022,        build_shared: "OFF", build_type: Debug, generator: "Visual Studio 17 2022" }
+          - { os: windows-2025-vs2026, build_shared: "OFF", build_type: Debug, generator: "Visual Studio 18 2026" }
+          - { name: "Min. CMake", cmake_version: "3.16",
+              os: ubuntu-latest,       build_shared: "ON",  build_type: Debug, generator: "Unix Makefiles" }
+
+    steps:
+      - name: Cache CMake
+        if: matrix.cmake_version
+        id: cache-cmake
+        uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+        with:
+          path: /tmp/cmake
+          key: ${{ runner.os }}-cmake-${{ matrix.cmake_version }}
+
+      - name: Install CMake dependencies
+        if: matrix.cmake_version
+        run: |
+            sudo apt-get -o Acquire::Retries=3 update
+            sudo apt-get -o Acquire::Retries=3 -y -q --no-install-suggests --no-install-recommends install curl libcurl4-openssl-dev libarchive-dev
+            echo /tmp/cmake/bin >> "$GITHUB_PATH"
+
+      - name: Build CMake
+        if: matrix.cmake_version && steps.cache-cmake.outputs.cache-hit != 'true'
+        run: |
+            version=${{ matrix.cmake_version }}
+            [[ ${version} =~ [0-9]+\.[0-9]+\.[0-9]+ ]] || version+=".0"
+            filename="cmake-$version.tar.gz"
+            cd "$(mktemp -d)"
+            wget https://cmake.org/files/v${version%.*}/$filename
+            tar -xf $filename --strip-components=1
+            flags=(
+              "-DCMAKE_BUILD_TYPE=Release"
+              "-DCMAKE_INSTALL_PREFIX=/tmp/cmake"
+              "-B" "__build"
+              "-Wno-dev"  # Make configuring more silent
+              "-DCMAKE_USE_SYSTEM_CURL=1"  # Avoid failures caused by newer (system) OpenSSL in CMake < 3.10
+              "-DCMAKE_CXX_FLAGS='-include cstdint -include limits'"  # Fix missing includes in CMake < 3.10
+            )
+            cmake "${flags[@]}" .
+            cmake --build __build -- -j 3
+            cmake --build __build --target install
+
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup Boost
+        run: |
+            set -x
+            SRC=$(pwd)
+            REF=${GITHUB_BASE_REF:-$GITHUB_REF}
+            REF=${REF##*/}
+            BOOST_BRANCH=develop && [ "$REF" == "master" ] && BOOST_BRANCH=master || true
+            cd ..
+            git clone -b $BOOST_BRANCH --depth 1 https://github.com/boostorg/boost.git boost-root
+            cd boost-root
+            git submodule update -q --init tools/boostdep
+            rm -rf "libs/$SELF" && mkdir -p "libs/$SELF"
+            # Through tar so symlinks are restored as-is on Windows
+            tar -C "$SRC" -cf - . | tar -C "libs/$SELF" -xf -
+            $(command -v python || command -v python3) tools/boostdep/depinst/depinst.py --include benchmark --include example --include examples --include tools --git_args "--jobs $GIT_FETCH_JOBS" "$SELF"
+            echo "BOOST_ROOT=$PWD" >> "$GITHUB_ENV"
+
+      - name: Run CMake tests
+        run: |
+            cd "$BOOST_ROOT"
+            mkdir __build_cmake_test__ && cd __build_cmake_test__
+            cmake -G "${{ matrix.generator }}" -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBOOST_INCLUDE_LIBRARIES=$SELF -DBUILD_SHARED_LIBS=${{ matrix.build_shared }} -DBUILD_TESTING=ON -DBoost_VERBOSE=ON ..
+            cmake --build . --target tests --config ${{ matrix.build_type }} -j3
+            ctest --output-on-failure --no-tests=error --build-config ${{ matrix.build_type }}
+
+      - name: Run CMake subdir tests
+        run: |
+            cd "$BOOST_ROOT/libs/$SELF/test/cmake_subdir_test"
+            mkdir __build_cmake_subdir_test__ && cd __build_cmake_subdir_test__
+            cmake -G "${{ matrix.generator }}" -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_SHARED_LIBS=${{ matrix.build_shared }} ..
+            cmake --build . --config ${{ matrix.build_type }} -j3
+            ctest --output-on-failure --no-tests=error --build-config ${{ matrix.build_type }}
+
+      - name: Install Library
+        run: |
+            BCM_INSTALL_PATH=/tmp/boost_install
+            echo "BCM_INSTALL_PATH=$BCM_INSTALL_PATH" >> "$GITHUB_ENV"
+            cd "$BOOST_ROOT"
+            mkdir __build_cmake_install_test__ && cd __build_cmake_install_test__
+            cmake -G "${{ matrix.generator }}" -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBOOST_INCLUDE_LIBRARIES=$SELF -DBUILD_SHARED_LIBS=${{ matrix.build_shared }} -DCMAKE_INSTALL_PREFIX="$BCM_INSTALL_PATH" -DBoost_VERBOSE=ON -DBoost_DEBUG=ON ..
+            cmake --build . --target install --config ${{ matrix.build_type }} -j3
+
+      - name: Run CMake install tests
+        run: |
+            cd "$BOOST_ROOT/libs/$SELF/test/cmake_install_test"
+            mkdir __build_cmake_install_test__ && cd __build_cmake_install_test__
+            unset BOOST_ROOT # Make sure CMake finds the installed config, not the source tree
+            cmake -G "${{ matrix.generator }}" -DBUILD_SHARED_LIBS=${{ matrix.build_shared }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_PREFIX_PATH="$BCM_INSTALL_PATH" -DCMAKE_VERBOSE_MAKEFILE=ON ..
+            cmake --build . --config ${{ matrix.build_type }} -j3
+            if [ "$RUNNER_OS" == "Windows" ]; then
+                export PATH="$BCM_INSTALL_PATH/bin:$PATH"
+            else
+                export LD_LIBRARY_PATH="$BCM_INSTALL_PATH/lib:${LD_LIBRARY_PATH:-}"
+            fi
+            ctest --output-on-failure --no-tests=error --build-config ${{ matrix.build_type }}

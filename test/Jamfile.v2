@@ -16,6 +16,8 @@ project
     <toolset>gcc:<cxxflags>-frounding-math
     <toolset>clang:<cxxflags>-frounding-math
     <toolset>msvc:<cxxflags>/fp\:strict
+    <toolset>clang-win:<cxxflags>/fp\:strict
+    <toolset>intel:<cxxflags>-fp-model=strict
   ;
 
 # bring in rules for testing

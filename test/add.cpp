@@ -15,7 +15,8 @@
 #include <boost/numeric/interval/utility.hpp>
 #include <boost/numeric/interval/policies.hpp>
 #include <boost/core/lightweight_test.hpp>
-#include <memory>
+#include <algorithm>
+#include <cstddef>
 #include "bugs.hpp"
 
 typedef enum { EXPR_VAR, EXPR_NEG, EXPR_UP, EXPR_DOWN, EXPR_ADD, EXPR_SUB } e_type;
@@ -25,6 +26,9 @@ struct pexpr {
   expr *ptr;
   expr* operator->() const { return ptr; }
   pexpr(expr *p = NULL): ptr(p) { }
+  pexpr(const pexpr& o);
+  pexpr& operator=(pexpr o) { std::swap(ptr, o.ptr); return *this; }
+  ~pexpr();
 };
 
 struct expr {
@@ -34,8 +38,12 @@ struct expr {
   pexpr e1, e2;
 };
 
+// Each pexpr owns its node, and copying one clones the subtree.
+pexpr::pexpr(const pexpr& o): ptr(o.ptr ? new expr(*o.ptr) : NULL) { }
+pexpr::~pexpr() { delete ptr; }
+
 pexpr var(int v) {
-  pexpr e = new expr;
+  pexpr e = new expr();
   e->type = EXPR_VAR;
   e->var = v;
   return e;
@@ -49,7 +57,7 @@ pexpr operator+(pexpr a, pexpr b) {
   if (a->type == EXPR_NEG) return b - a->e;
   if (b->type == EXPR_NEG) return a - b->e;
   if (a->type == EXPR_VAR && b->type == EXPR_VAR && a->var > b->var) return b + a;
-  pexpr c = new expr;
+  pexpr c = new expr();
   c->type = EXPR_ADD;
   c->e1 = a;
   c->e2 = b;
@@ -58,7 +66,7 @@ pexpr operator+(pexpr a, pexpr b) {
 
 pexpr operator-(pexpr a, pexpr b) {
   if (b->type == EXPR_NEG) return a + b->e;
-  pexpr c = new expr;
+  pexpr c = new expr();
   c->type = EXPR_SUB;
   c->e1 = a;
   c->e2 = b;
@@ -66,14 +74,14 @@ pexpr operator-(pexpr a, pexpr b) {
 }
 
 pexpr down(pexpr a) {
-  pexpr e = new expr;
+  pexpr e = new expr();
   e->type = EXPR_DOWN;
   e->e = a;
   return e;
 }
 
 pexpr up(pexpr a) {
-  pexpr e = new expr;
+  pexpr e = new expr();
   e->type = EXPR_UP;
   e->e = a;
   return e;
@@ -85,7 +93,7 @@ pexpr operator-(pexpr a) {
   if (a->type == EXPR_DOWN) return up(-a->e);
   if (a->type == EXPR_SUB) return a->e2 - a->e1;
   if (a->type == EXPR_ADD) return -a->e1 - a->e2;
-  pexpr e = new expr;
+  pexpr e = new expr();
   e->type = EXPR_NEG;
   e->e = a;
   return e;
