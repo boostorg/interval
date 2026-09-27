@@ -1,6 +1,6 @@
 # Copyright 2018, 2019 Peter Dimov
 # Copyright 2025 James E. King III
-# Copyright 2026 Sayan
+# Copyright 2026 Sayan Samanta
 # Distributed under the Boost Software License, Version 1.0.
 # See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 
@@ -31,11 +31,9 @@ foreach(t add det fmod mul overflow pi pow cmp cmp_exp cmp_lex cmp_set test_floa
 endforeach()
 
 boost_test(TYPE run SOURCES cmp_exn.cpp LINK_LIBRARIES Boost::logic)
+boost_test(TYPE run SOURCES cmp_tribool.cpp LINK_LIBRARIES Boost::logic)
 
 # MSVC-only regression test (b2: <build>no <toolset>msvc:<build>yes).
 if(MSVC)
   boost_test(TYPE run SOURCES msvc_x64_flags.cpp)
 endif()
-
-# https://github.com/boostorg/interval/issues/15
-# boost_test(TYPE run SOURCES cmp_tribool.cpp)
