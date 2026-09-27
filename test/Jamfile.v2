@@ -41,8 +41,7 @@ import testing ;
     [ run cmp_exp.cpp ]
     [ run cmp_lex.cpp ]
     [ run cmp_set.cpp ]
- # https://github.com/boostorg/interval/issues/15
- #  [ run cmp_tribool.cpp ]
+    [ run cmp_tribool.cpp : : : <library>/boost/logic//boost_logic ]
     [ run test_float.cpp
       : : : <build>yes <toolset>msvc-10.0:<build>no ]
             # https://github.com/boostorg/interval/issues/17
