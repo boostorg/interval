@@ -26,6 +26,11 @@ set(BOOST_TEST_LINK_LIBRARIES Boost::numeric_interval Boost::core)
 
 boost_test(TYPE compile SOURCES integer.cpp)
 
+# Each compare header must compile on its own (clang rejects them otherwise).
+foreach(h certain possible lexicographic set tribool)
+  boost_test(TYPE compile SOURCES compare_${h}_self_contained.cpp)
+endforeach()
+
 foreach(t add det fmod mul overflow pi pow cmp cmp_exp cmp_lex cmp_set test_float)
   boost_test(TYPE run SOURCES ${t}.cpp)
 endforeach()
