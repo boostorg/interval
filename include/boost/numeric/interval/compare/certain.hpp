@@ -11,6 +11,7 @@
 #define BOOST_NUMERIC_INTERVAL_COMPARE_CERTAIN_HPP
 
 #include <boost/numeric/interval/detail/interval_prototype.hpp>
+#include <boost/numeric/interval/detail/comparison_error.hpp>
 #include <boost/numeric/interval/detail/test_input.hpp>
 
 namespace boost {
