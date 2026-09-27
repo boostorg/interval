@@ -23,7 +23,7 @@ namespace numeric {
 namespace interval_lib {
 
 template<class I> inline
-I add(const typename I::base_type& x, const typename I::base_type& y)
+BOOST_GPU_ENABLED I add(const typename I::base_type& x, const typename I::base_type& y)
 {
   typedef typename I::traits_type Policies;
   if (detail::test_input<typename I::base_type, Policies>(x, y))
@@ -33,7 +33,7 @@ I add(const typename I::base_type& x, const typename I::base_type& y)
 }
 
 template<class I> inline
-I sub(const typename I::base_type& x, const typename I::base_type& y)
+BOOST_GPU_ENABLED I sub(const typename I::base_type& x, const typename I::base_type& y)
 {
   typedef typename I::traits_type Policies;
   if (detail::test_input<typename I::base_type, Policies>(x, y))
@@ -43,7 +43,7 @@ I sub(const typename I::base_type& x, const typename I::base_type& y)
 }
 
 template<class I> inline
-I mul(const typename I::base_type& x, const typename I::base_type& y)
+BOOST_GPU_ENABLED I mul(const typename I::base_type& x, const typename I::base_type& y)
 {
   typedef typename I::traits_type Policies;
   if (detail::test_input<typename I::base_type, Policies>(x, y))
@@ -53,7 +53,7 @@ I mul(const typename I::base_type& x, const typename I::base_type& y)
 }
 
 template<class I> inline
-I div(const typename I::base_type& x, const typename I::base_type& y)
+BOOST_GPU_ENABLED I div(const typename I::base_type& x, const typename I::base_type& y)
 {
   typedef typename I::traits_type Policies;
   if (detail::test_input<typename I::base_type, Policies>(x, y) || user::is_zero(y))

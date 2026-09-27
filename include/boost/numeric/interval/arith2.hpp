@@ -29,8 +29,8 @@ namespace boost {
 namespace numeric {
 
 template<class T, class Policies> inline
-interval<T, Policies> fmod(const interval<T, Policies>& x,
-                           const interval<T, Policies>& y)
+BOOST_GPU_ENABLED interval<T, Policies> fmod(const interval<T, Policies>& x,
+                                             const interval<T, Policies>& y)
 {
   if (interval_lib::detail::test_input(x, y))
     return interval<T, Policies>::empty();
@@ -42,7 +42,7 @@ interval<T, Policies> fmod(const interval<T, Policies>& x,
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> fmod(const interval<T, Policies>& x, const T& y)
+BOOST_GPU_ENABLED interval<T, Policies> fmod(const interval<T, Policies>& x, const T& y)
 {
   if (interval_lib::detail::test_input(x, y))
     return interval<T, Policies>::empty();
@@ -53,7 +53,7 @@ interval<T, Policies> fmod(const interval<T, Policies>& x, const T& y)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> fmod(const T& x, const interval<T, Policies>& y)
+BOOST_GPU_ENABLED interval<T, Policies> fmod(const T& x, const interval<T, Policies>& y)
 {
   if (interval_lib::detail::test_input(x, y))
     return interval<T, Policies>::empty();
@@ -67,8 +67,8 @@ interval<T, Policies> fmod(const T& x, const interval<T, Policies>& y)
 namespace interval_lib {
 
 template<class T, class Policies> inline
-interval<T, Policies> division_part1(const interval<T, Policies>& x,
-                                     const interval<T, Policies>& y, bool& b)
+BOOST_GPU_ENABLED interval<T, Policies> division_part1(const interval<T, Policies>& x,
+                                                       const interval<T, Policies>& y, bool& b)
 {
   typedef interval<T, Policies> I;
   b = false;
@@ -90,15 +90,15 @@ interval<T, Policies> division_part1(const interval<T, Policies>& x,
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> division_part2(const interval<T, Policies>& x,
-                                     const interval<T, Policies>& y, bool b = true)
+BOOST_GPU_ENABLED interval<T, Policies> division_part2(const interval<T, Policies>& x,
+                                                       const interval<T, Policies>& y, bool b = true)
 {
   if (!b) return interval<T, Policies>::empty();
   return detail::div_zero_part2(x, y);
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> multiplicative_inverse(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> multiplicative_inverse(const interval<T, Policies>& x)
 {
   typedef interval<T, Policies> I;
   if (detail::test_input(x))
@@ -124,7 +124,7 @@ interval<T, Policies> multiplicative_inverse(const interval<T, Policies>& x)
 namespace detail {
 
 template<class T, class Rounding> inline
-T pow_dn(const T& x_, int pwr, Rounding& rnd) // x and pwr are positive
+BOOST_GPU_ENABLED T pow_dn(const T& x_, int pwr, Rounding& rnd) // x and pwr are positive
 {
   T x = x_;
   T y = (pwr & 1) ? x_ : static_cast<T>(1);
@@ -138,7 +138,7 @@ T pow_dn(const T& x_, int pwr, Rounding& rnd) // x and pwr are positive
 }
 
 template<class T, class Rounding> inline
-T pow_up(const T& x_, int pwr, Rounding& rnd) // x and pwr are positive
+BOOST_GPU_ENABLED T pow_up(const T& x_, int pwr, Rounding& rnd) // x and pwr are positive
 {
   T x = x_;
   T y = (pwr & 1) ? x_ : static_cast<T>(1);
@@ -155,7 +155,7 @@ T pow_up(const T& x_, int pwr, Rounding& rnd) // x and pwr are positive
 } // namespace interval_lib
 
 template<class T, class Policies> inline
-interval<T, Policies> pow(const interval<T, Policies>& x, int pwr)
+BOOST_GPU_ENABLED interval<T, Policies> pow(const interval<T, Policies>& x, int pwr)
 {
   BOOST_USING_STD_MAX();
   using interval_lib::detail::pow_dn;
@@ -195,7 +195,7 @@ interval<T, Policies> pow(const interval<T, Policies>& x, int pwr)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> sqrt(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> sqrt(const interval<T, Policies>& x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x) || interval_lib::user::is_neg(x.upper()))
@@ -206,7 +206,7 @@ interval<T, Policies> sqrt(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> square(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> square(const interval<T, Policies>& x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
@@ -226,7 +226,7 @@ namespace interval_lib {
 namespace detail {
 
 template< class I > inline
-I root_aux(typename I::base_type const &x, int k) // x and k are bigger than one
+BOOST_GPU_ENABLED I root_aux(typename I::base_type const &x, int k) // x and k are bigger than one
 {
   typedef typename I::base_type T;
   T tk(k);
@@ -240,7 +240,7 @@ I root_aux(typename I::base_type const &x, int k) // x and k are bigger than one
 }
 
 template< class I > inline // x is positive and k bigger than one
-typename I::base_type root_aux_dn(typename I::base_type const &x, int k)
+BOOST_GPU_ENABLED typename I::base_type root_aux_dn(typename I::base_type const &x, int k)
 {
   typedef typename I::base_type T;
   typedef typename I::traits_type Policies;
@@ -252,7 +252,7 @@ typename I::base_type root_aux_dn(typename I::base_type const &x, int k)
 }
 
 template< class I > inline // x is positive and k bigger than one
-typename I::base_type root_aux_up(typename I::base_type const &x, int k)
+BOOST_GPU_ENABLED typename I::base_type root_aux_up(typename I::base_type const &x, int k)
 {
   typedef typename I::base_type T;
   typedef typename I::traits_type Policies;
@@ -267,7 +267,7 @@ typename I::base_type root_aux_up(typename I::base_type const &x, int k)
 } // namespace interval_lib
 
 template< class T, class Policies > inline
-interval<T, Policies> nth_root(interval<T, Policies> const &x, int k)
+BOOST_GPU_ENABLED interval<T, Policies> nth_root(interval<T, Policies> const &x, int k)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x)) return I::empty();

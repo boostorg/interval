@@ -17,49 +17,49 @@ namespace boost {
 namespace numeric {
 
 template<class T, class Policies> inline
-interval<T, Policies> operator+ (const interval<T, Policies>& x, int y)
+BOOST_GPU_ENABLED interval<T, Policies> operator+ (const interval<T, Policies>& x, int y)
 {
   return x + static_cast<T>(y);
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator+ (int x, const interval<T, Policies>& y)
+BOOST_GPU_ENABLED interval<T, Policies> operator+ (int x, const interval<T, Policies>& y)
 {
   return static_cast<T>(x) + y;
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator- (const interval<T, Policies>& x, int y)
+BOOST_GPU_ENABLED interval<T, Policies> operator- (const interval<T, Policies>& x, int y)
 {
   return x - static_cast<T>(y);
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator- (int x, const interval<T, Policies>& y)
+BOOST_GPU_ENABLED interval<T, Policies> operator- (int x, const interval<T, Policies>& y)
 {
   return static_cast<T>(x) - y;
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator* (const interval<T, Policies>& x, int y)
+BOOST_GPU_ENABLED interval<T, Policies> operator* (const interval<T, Policies>& x, int y)
 {
   return x * static_cast<T>(y);
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator* (int x, const interval<T, Policies>& y)
+BOOST_GPU_ENABLED interval<T, Policies> operator* (int x, const interval<T, Policies>& y)
 {
   return static_cast<T>(x) * y;
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator/ (const interval<T, Policies>& x, int y)
+BOOST_GPU_ENABLED interval<T, Policies> operator/ (const interval<T, Policies>& x, int y)
 {
   return x / static_cast<T>(y);
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> operator/ (int x, const interval<T, Policies>& y)
+BOOST_GPU_ENABLED interval<T, Policies> operator/ (int x, const interval<T, Policies>& y)
 {
   return static_cast<T>(x) / y;
 }

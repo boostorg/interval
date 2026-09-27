@@ -12,6 +12,7 @@
 
 #include <boost/config.hpp>
 #include <boost/numeric/interval/detail/interval_prototype.hpp>
+#include <boost/numeric/interval/detail/bugs.hpp>
 #include <utility>
 
 /*
@@ -25,94 +26,94 @@ namespace boost { namespace numeric {
      */
 
     template<class T, class Policies>
-    const T& lower(const interval<T,Policies>& x);
+    BOOST_GPU_ENABLED const T& lower(const interval<T,Policies>& x);
 
     template<class T, class Policies>
-    const T& upper(const interval<T,Policies>& x);
+    BOOST_GPU_ENABLED const T& upper(const interval<T,Policies>& x);
 
     template<class T, class Policies>
-    T checked_lower(const interval<T,Policies>& x);
+    BOOST_GPU_ENABLED T checked_lower(const interval<T,Policies>& x);
 
     template<class T, class Policies>
-    T width(const interval<T,Policies>& x);
+    BOOST_GPU_ENABLED T width(const interval<T,Policies>& x);
 
     template<class T, class Policies>
-    T median(const interval<T,Policies>& x);
+    BOOST_GPU_ENABLED T median(const interval<T,Policies>& x);
 
     template<class T, class Policies>
-    interval<T,Policies> widen(const interval<T,Policies>& x, const T& v);
+    BOOST_GPU_ENABLED interval<T,Policies> widen(const interval<T,Policies>& x, const T& v);
 
     /*
      * Set-like operations
      */
 
     template <class T, class Policies>
-    bool empty(const interval<T,Policies>& x);
+    BOOST_GPU_ENABLED bool empty(const interval<T,Policies>& x);
 
     template <class T, class Policies>
-    bool zero_in(const interval<T,Policies>& x);
+    BOOST_GPU_ENABLED bool zero_in(const interval<T,Policies>& x);
 
     template <class T, class Policies>
-    bool in_zero(const interval<T,Policies>& x);  // DEPRECATED
+    BOOST_GPU_ENABLED bool in_zero(const interval<T,Policies>& x);  // DEPRECATED
 
     template <class T, class Policies>
-    bool in(const T& x, const interval<T,Policies>& y);
+    BOOST_GPU_ENABLED bool in(const T& x, const interval<T,Policies>& y);
 
     template <class T, class Policies>
-    bool
+    BOOST_GPU_ENABLED bool
         subset(
             const interval<T,Policies>& x
           , const interval<T,Policies>& y
         );
 
     template <class T, class Policies1, class Policies2>
-    bool
+    BOOST_GPU_ENABLED bool
         proper_subset(
             const interval<T,Policies1>& x
           , const interval<T,Policies2>& y
         );
 
     template <class T, class Policies1, class Policies2>
-    bool
+    BOOST_GPU_ENABLED bool
         overlap(
             const interval<T,Policies1>& x
           , const interval<T,Policies2>& y
         );
 
     template <class T, class Policies>
-    bool singleton(const interval<T, Policies>& x);
+    BOOST_GPU_ENABLED bool singleton(const interval<T, Policies>& x);
 
     template <class T, class Policies1, class Policies2>
-    bool
+    BOOST_GPU_ENABLED bool
         equal(
             const interval<T,Policies1>& x
           , const interval<T,Policies2>& y
         );
 
     template <class T, class Policies>
-    interval<T, Policies>
+    BOOST_GPU_ENABLED interval<T, Policies>
         intersect(
             const interval<T,Policies>& x
           , const interval<T,Policies>& y
         );
 
     template <class T, class Policies>
-    interval<T, Policies>
+    BOOST_GPU_ENABLED interval<T, Policies>
         hull(const interval<T,Policies>& x, const interval<T,Policies>& y);
 
     template <class T, class Policies>
-    interval<T, Policies>
+    BOOST_GPU_ENABLED interval<T, Policies>
         hull(const interval<T,Policies>& x, const T& y);
 
     template <class T, class Policies>
-    interval<T, Policies>
+    BOOST_GPU_ENABLED interval<T, Policies>
         hull(const T& x, const interval<T,Policies>& y);
 
     template <class T>
-    interval<T> hull(const T& x, const T& y);
-
+    BOOST_GPU_ENABLED interval<T> hull(const T& x, const T& y);
+    
     template <class T, class Policies>
-    std::pair<interval<T,Policies>,interval<T,Policies> >
+    BOOST_GPU_ENABLED BOOST_NUMERIC_INTERVAL_std(pair)<interval<T,Policies>,interval<T,Policies> >
         bisect(const interval<T,Policies>& x);
 
     /*
@@ -120,48 +121,48 @@ namespace boost { namespace numeric {
      */
 
     template <class T, class Policies>
-    T norm(const interval<T,Policies>& x);
+    BOOST_GPU_ENABLED T norm(const interval<T,Policies>& x);
 
     template <class T, class Policies>
-    interval<T,Policies> abs(const interval<T,Policies>& x);
+    BOOST_GPU_ENABLED interval<T,Policies> abs(const interval<T,Policies>& x);
 
     template <class T, class Policies>
-    interval<T,Policies>
+    BOOST_GPU_ENABLED interval<T,Policies>
         max BOOST_PREVENT_MACRO_SUBSTITUTION (
             const interval<T,Policies>& x
           , const interval<T,Policies>& y
         );
 
     template <class T, class Policies>
-    interval<T,Policies>
+    BOOST_GPU_ENABLED interval<T,Policies>
         max BOOST_PREVENT_MACRO_SUBSTITUTION (
             const interval<T,Policies>& x
           , const T& y
         );
 
     template <class T, class Policies>
-    interval<T,Policies>
+    BOOST_GPU_ENABLED interval<T,Policies>
         max BOOST_PREVENT_MACRO_SUBSTITUTION (
             const T& x
           , const interval<T,Policies>& y
         );
 
     template <class T, class Policies>
-    interval<T,Policies>
+    BOOST_GPU_ENABLED interval<T,Policies>
         min BOOST_PREVENT_MACRO_SUBSTITUTION (
             const interval<T,Policies>& x
           , const interval<T,Policies>& y
         );
 
     template <class T, class Policies>
-    interval<T,Policies>
+    BOOST_GPU_ENABLED interval<T,Policies>
         min BOOST_PREVENT_MACRO_SUBSTITUTION (
             const interval<T,Policies>& x
           , const T& y
         );
 
     template <class T, class Policies>
-    interval<T,Policies>
+    BOOST_GPU_ENABLED interval<T,Policies>
         min BOOST_PREVENT_MACRO_SUBSTITUTION (
             const T& x
           , const interval<T,Policies>& y

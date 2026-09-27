@@ -22,8 +22,8 @@ namespace interval_lib {
 namespace detail {
 
 template<class T, class Policies> inline
-interval<T, Policies> div_non_zero(const interval<T, Policies>& x,
-                                   const interval<T, Policies>& y)
+BOOST_GPU_ENABLED interval<T, Policies> div_non_zero(const interval<T, Policies>& x,
+                                                     const interval<T, Policies>& y)
 {
   // assert(!in_zero(y));
   typename Policies::rounding rnd;
@@ -50,7 +50,7 @@ interval<T, Policies> div_non_zero(const interval<T, Policies>& x,
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> div_non_zero(const T& x, const interval<T, Policies>& y)
+BOOST_GPU_ENABLED interval<T, Policies> div_non_zero(const T& x, const interval<T, Policies>& y)
 {
   // assert(!in_zero(y));
   typename Policies::rounding rnd;
@@ -64,7 +64,7 @@ interval<T, Policies> div_non_zero(const T& x, const interval<T, Policies>& y)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> div_positive(const interval<T, Policies>& x, const T& yu)
+BOOST_GPU_ENABLED interval<T, Policies> div_positive(const interval<T, Policies>& x, const T& yu)
 {
   // assert(::boost::numeric::interval_lib::user::is_pos(yu));
   if (::boost::numeric::interval_lib::user::is_zero(x.lower()) &&
@@ -84,7 +84,7 @@ interval<T, Policies> div_positive(const interval<T, Policies>& x, const T& yu)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> div_positive(const T& x, const T& yu)
+BOOST_GPU_ENABLED interval<T, Policies> div_positive(const T& x, const T& yu)
 {
   // assert(::boost::numeric::interval_lib::user::is_pos(yu));
   typedef interval<T, Policies> I;
@@ -99,7 +99,7 @@ interval<T, Policies> div_positive(const T& x, const T& yu)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> div_negative(const interval<T, Policies>& x, const T& yl)
+BOOST_GPU_ENABLED interval<T, Policies> div_negative(const interval<T, Policies>& x, const T& yl)
 {
   // assert(::boost::numeric::interval_lib::user::is_neg(yl));
   if (::boost::numeric::interval_lib::user::is_zero(x.lower()) &&
@@ -119,7 +119,7 @@ interval<T, Policies> div_negative(const interval<T, Policies>& x, const T& yl)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> div_negative(const T& x, const T& yl)
+BOOST_GPU_ENABLED interval<T, Policies> div_negative(const T& x, const T& yl)
 {
   // assert(::boost::numeric::interval_lib::user::is_neg(yl));
   typedef interval<T, Policies> I;
@@ -134,7 +134,7 @@ interval<T, Policies> div_negative(const T& x, const T& yl)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> div_zero(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> div_zero(const interval<T, Policies>& x)
 {
   if (::boost::numeric::interval_lib::user::is_zero(x.lower()) &&
       ::boost::numeric::interval_lib::user::is_zero(x.upper()))
@@ -143,7 +143,7 @@ interval<T, Policies> div_zero(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> div_zero(const T& x)
+BOOST_GPU_ENABLED interval<T, Policies> div_zero(const T& x)
 {
   if (::boost::numeric::interval_lib::user::is_zero(x))
     return interval<T, Policies>(static_cast<T>(0), static_cast<T>(0), true);
@@ -151,7 +151,7 @@ interval<T, Policies> div_zero(const T& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> div_zero_part1(const interval<T, Policies>& x,
+BOOST_GPU_ENABLED interval<T, Policies> div_zero_part1(const interval<T, Policies>& x,
                                      const interval<T, Policies>& y, bool& b)
 {
   // assert(::boost::numeric::interval_lib::user::is_neg(y.lower()) && ::boost::numeric::interval_lib::user::is_pos(y.upper()));
@@ -173,8 +173,8 @@ interval<T, Policies> div_zero_part1(const interval<T, Policies>& x,
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> div_zero_part2(const interval<T, Policies>& x,
-                                     const interval<T, Policies>& y)
+BOOST_GPU_ENABLED interval<T, Policies> div_zero_part2(const interval<T, Policies>& x,
+                                                       const interval<T, Policies>& y)
 {
   // assert(::boost::numeric::interval_lib::user::is_neg(y.lower()) && ::boost::numeric::interval_lib::user::is_pos(y.upper()) && (div_zero_part1(x, y, b), b));
   typename Policies::rounding rnd;

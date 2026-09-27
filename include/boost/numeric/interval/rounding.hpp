@@ -22,13 +22,13 @@ template<class T>
 struct rounding_control
 {
   typedef int rounding_mode;
-  static void get_rounding_mode(rounding_mode&) {}
-  static void set_rounding_mode(rounding_mode)  {}
-  static void upward()     {}
-  static void downward()   {}
-  static void to_nearest() {}
-  static const T& to_int(const T& x)         { return x; }
-  static const T& force_rounding(const T& x) { return x; }
+  static BOOST_GPU_ENABLED void get_rounding_mode(rounding_mode&) {}
+  static BOOST_GPU_ENABLED void set_rounding_mode(rounding_mode)  {}
+  static BOOST_GPU_ENABLED void upward()     {}
+  static BOOST_GPU_ENABLED void downward()   {}
+  static BOOST_GPU_ENABLED void to_nearest() {}
+  static BOOST_GPU_ENABLED const T& to_int(const T& x)         { return x; }
+  static BOOST_GPU_ENABLED const T& force_rounding(const T& x) { return x; }
 };
 
 /*

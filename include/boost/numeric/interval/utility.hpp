@@ -13,7 +13,6 @@
 
 #include <boost/numeric/interval/utility_fwd.hpp>
 #include <boost/numeric/interval/detail/test_input.hpp>
-#include <boost/numeric/interval/detail/bugs.hpp>
 #include <algorithm>
 #include <utility>
 
@@ -29,19 +28,19 @@ namespace numeric {
  */
 
 template<class T, class Policies> inline
-const T& lower(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED const T& lower(const interval<T, Policies>& x)
 {
   return x.lower();
 }
 
 template<class T, class Policies> inline
-const T& upper(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED const T& upper(const interval<T, Policies>& x)
 {
   return x.upper();
 }
 
 template<class T, class Policies> inline
-T checked_lower(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED T checked_lower(const interval<T, Policies>& x)
 {
   if (empty(x)) {
     typedef typename Policies::checking checking;
@@ -51,7 +50,7 @@ T checked_lower(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-T checked_upper(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED T checked_upper(const interval<T, Policies>& x)
 {
   if (empty(x)) {
     typedef typename Policies::checking checking;
@@ -61,7 +60,7 @@ T checked_upper(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-T width(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED T width(const interval<T, Policies>& x)
 {
   if (interval_lib::detail::test_input(x)) return static_cast<T>(0);
   typename Policies::rounding rnd;
@@ -69,7 +68,7 @@ T width(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-T median(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED T median(const interval<T, Policies>& x)
 {
   if (interval_lib::detail::test_input(x)) {
     typedef typename Policies::checking checking;
@@ -80,7 +79,7 @@ T median(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> widen(const interval<T, Policies>& x, const T& v)
+BOOST_GPU_ENABLED interval<T, Policies> widen(const interval<T, Policies>& x, const T& v)
 {
   if (interval_lib::detail::test_input(x))
     return interval<T, Policies>::empty();
@@ -94,34 +93,34 @@ interval<T, Policies> widen(const interval<T, Policies>& x, const T& v)
  */
 
 template<class T, class Policies> inline
-bool empty(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED bool empty(const interval<T, Policies>& x)
 {
   return interval_lib::detail::test_input(x);
 }
 
 template<class T, class Policies> inline
-bool zero_in(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED bool zero_in(const interval<T, Policies>& x)
 {
   if (interval_lib::detail::test_input(x)) return false;
   return (!interval_lib::user::is_pos(x.lower())) &&
          (!interval_lib::user::is_neg(x.upper()));
 }
 
-template<class T, class Policies> inline
+/* template<class T, class Policies> inline
 bool in_zero(const interval<T, Policies>& x) // DEPRECATED
 {
   return zero_in<T, Policies>(x);
-}
+} */
 
 template<class T, class Policies> inline
-bool in(const T& x, const interval<T, Policies>& y)
+BOOST_GPU_ENABLED bool in(const T& x, const interval<T, Policies>& y)
 {
   if (interval_lib::detail::test_input(x, y)) return false;
   return y.lower() <= x && x <= y.upper();
 }
 
 template<class T, class Policies> inline
-bool subset(const interval<T, Policies>& x,
+BOOST_GPU_ENABLED bool subset(const interval<T, Policies>& x,
             const interval<T, Policies>& y)
 {
   if (empty(x)) return true;
@@ -129,7 +128,7 @@ bool subset(const interval<T, Policies>& x,
 }
 
 template<class T, class Policies1, class Policies2> inline
-bool proper_subset(const interval<T, Policies1>& x,
+BOOST_GPU_ENABLED bool proper_subset(const interval<T, Policies1>& x,
                    const interval<T, Policies2>& y)
 {
   if (empty(y)) return false;
@@ -139,7 +138,7 @@ bool proper_subset(const interval<T, Policies1>& x,
 }
 
 template<class T, class Policies1, class Policies2> inline
-bool overlap(const interval<T, Policies1>& x,
+BOOST_GPU_ENABLED bool overlap(const interval<T, Policies1>& x,
              const interval<T, Policies2>& y)
 {
   if (interval_lib::detail::test_input(x, y)) return false;
@@ -148,21 +147,21 @@ bool overlap(const interval<T, Policies1>& x,
 }
 
 template<class T, class Policies> inline
-bool singleton(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED bool singleton(const interval<T, Policies>& x)
 {
  return !empty(x) && x.lower() == x.upper();
 }
 
 template<class T, class Policies1, class Policies2> inline
-bool equal(const interval<T, Policies1>& x, const interval<T, Policies2>& y)
+BOOST_GPU_ENABLED bool equal(const interval<T, Policies1>& x, const interval<T, Policies2>& y)
 {
   if (empty(x)) return empty(y);
   return !empty(y) && x.lower() == y.lower() && x.upper() == y.upper();
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> intersect(const interval<T, Policies>& x,
-                                const interval<T, Policies>& y)
+BOOST_GPU_ENABLED interval<T, Policies> intersect(const interval<T, Policies>& x,
+                                                  const interval<T, Policies>& y)
 {
   BOOST_USING_STD_MIN();
   BOOST_USING_STD_MAX();
@@ -175,7 +174,7 @@ interval<T, Policies> intersect(const interval<T, Policies>& x,
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> hull(const interval<T, Policies>& x,
+BOOST_GPU_ENABLED interval<T, Policies> hull(const interval<T, Policies>& x,
                            const interval<T, Policies>& y)
 {
   BOOST_USING_STD_MIN();
@@ -192,7 +191,7 @@ interval<T, Policies> hull(const interval<T, Policies>& x,
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> hull(const interval<T, Policies>& x, const T& y)
+BOOST_GPU_ENABLED interval<T, Policies> hull(const interval<T, Policies>& x, const T& y)
 {
   BOOST_USING_STD_MIN();
   BOOST_USING_STD_MAX();
@@ -208,7 +207,7 @@ interval<T, Policies> hull(const interval<T, Policies>& x, const T& y)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> hull(const T& x, const interval<T, Policies>& y)
+BOOST_GPU_ENABLED interval<T, Policies> hull(const T& x, const interval<T, Policies>& y)
 {
   BOOST_USING_STD_MIN();
   BOOST_USING_STD_MAX();
@@ -224,20 +223,21 @@ interval<T, Policies> hull(const T& x, const interval<T, Policies>& y)
 }
 
 template<class T> inline
-interval<T> hull(const T& x, const T& y)
+BOOST_GPU_ENABLED interval<T> hull(const T& x, const T& y)
 {
   return interval<T>::hull(x, y);
 }
 
 template<class T, class Policies> inline
-std::pair<interval<T, Policies>, interval<T, Policies> >
+BOOST_GPU_ENABLED BOOST_NUMERIC_INTERVAL_std(pair)<interval<T,Policies>,interval<T,Policies> >
 bisect(const interval<T, Policies>& x)
 {
+  BOOST_NUMERIC_INTERVAL_using_std(pair);
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
-    return std::pair<I,I>(I::empty(), I::empty());
+    return pair<I,I>(I::empty(), I::empty());
   const T m = median(x);
-  return std::pair<I,I>(I(x.lower(), m, true), I(m, x.upper(), true));
+  return pair<I,I>(I(x.lower(), m, true), I(m, x.upper(), true));
 }
 
 /*

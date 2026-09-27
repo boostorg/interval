@@ -25,7 +25,7 @@ namespace boost {
 namespace numeric {
 
 template<class T, class Policies> inline
-interval<T, Policies> exp(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> exp(const interval<T, Policies>& x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
@@ -35,7 +35,7 @@ interval<T, Policies> exp(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> log(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> log(const interval<T, Policies>& x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x) ||
@@ -49,7 +49,7 @@ interval<T, Policies> log(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> cos(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> cos(const interval<T, Policies>& x)
 {
   if (interval_lib::detail::test_input(x))
     return interval<T, Policies>::empty();
@@ -78,7 +78,7 @@ interval<T, Policies> cos(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> sin(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> sin(const interval<T, Policies>& x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
@@ -91,7 +91,7 @@ interval<T, Policies> sin(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> tan(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> tan(const interval<T, Policies>& x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
@@ -111,7 +111,7 @@ interval<T, Policies> tan(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> asin(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> asin(const interval<T, Policies>& x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x)
@@ -128,7 +128,7 @@ interval<T, Policies> asin(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> acos(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> acos(const interval<T, Policies>& x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x)
@@ -145,7 +145,7 @@ interval<T, Policies> acos(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> atan(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> atan(const interval<T, Policies>& x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
@@ -155,7 +155,7 @@ interval<T, Policies> atan(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> sinh(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> sinh(const interval<T, Policies>& x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
@@ -165,7 +165,7 @@ interval<T, Policies> sinh(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> cosh(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> cosh(const interval<T, Policies>& x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
@@ -180,7 +180,7 @@ interval<T, Policies> cosh(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> tanh(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> tanh(const interval<T, Policies>& x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
@@ -190,7 +190,7 @@ interval<T, Policies> tanh(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> asinh(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> asinh(const interval<T, Policies>& x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
@@ -200,7 +200,7 @@ interval<T, Policies> asinh(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> acosh(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> acosh(const interval<T, Policies>& x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x) || x.upper() < static_cast<T>(1))
@@ -211,7 +211,7 @@ interval<T, Policies> acosh(const interval<T, Policies>& x)
 }
 
 template<class T, class Policies> inline
-interval<T, Policies> atanh(const interval<T, Policies>& x)
+BOOST_GPU_ENABLED interval<T, Policies> atanh(const interval<T, Policies>& x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x)

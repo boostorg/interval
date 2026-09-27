@@ -45,4 +45,24 @@
 #  define BOOST_NUMERIC_INTERVAL_using_ahyp(a)
 #endif
 
+#if defined(__CUDACC__)
+#  define BOOST_GPU_DISABLED __host__
+#else
+#  define BOOST_GPU_DISABLED
+#endif
+
+#if defined(__CUDA_ARCH__)
+#  define BOOST_NUMERIC_INTERVAL_std(a) cuda::std::a
+#  undef BOOST_USING_STD_MIN
+#  define BOOST_USING_STD_MIN() using boost::numeric::gpu_spec::min
+#  undef BOOST_USING_STD_MAX
+#  define BOOST_USING_STD_MAX() using boost::numeric::gpu_spec::max
+#  define BOOST_NUMERIC_INTERVAL_throw(exception) printf("%s\n", exception); __trap()
+#else
+#  define BOOST_NUMERIC_INTERVAL_std(a) std::a
+#  define BOOST_NUMERIC_INTERVAL_throw(exception) throw std::runtime_error(exception)
+#endif
+
+#define BOOST_NUMERIC_INTERVAL_using_std(a) using BOOST_NUMERIC_INTERVAL_std(a)
+
 #endif // BOOST_NUMERIC_INTERVAL_DETAIL_BUGS
