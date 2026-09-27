@@ -26,6 +26,11 @@ import testing ;
 {
   test-suite numeric/interval :
     [ compile integer.cpp ]
+    [ compile compare_certain_self_contained.cpp ]
+    [ compile compare_possible_self_contained.cpp ]
+    [ compile compare_lexicographic_self_contained.cpp ]
+    [ compile compare_set_self_contained.cpp ]
+    [ compile compare_tribool_self_contained.cpp ]
 
     [ run add.cpp      ]
     [ run det.cpp      ]
