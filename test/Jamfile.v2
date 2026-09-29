@@ -23,47 +23,23 @@ project
 # bring in rules for testing
 import testing ;
 import os ;
+import path ;
 import regex ;
 
 # Each public header must compile on its own.  These compile-only tests are
 # slow and add little per configuration, so they are off by default; set the
 # BOOST_NUMERIC_INTERVAL_TEST_SELF_CONTAINED_HEADERS environment variable to
-# run them.  Keep the list in sync with CMakeLists.txt.
-local self_contained_headers =
-  interval.hpp
-  interval/arith.hpp
-  interval/arith2.hpp
-  interval/arith3.hpp
-  interval/checking.hpp
-  interval/compare.hpp
-  interval/compare/certain.hpp
-  interval/compare/explicit.hpp
-  interval/compare/lexicographic.hpp
-  interval/compare/possible.hpp
-  interval/compare/set.hpp
-  interval/compare/tribool.hpp
-  interval/constants.hpp
-  interval/ext/integer.hpp
-  interval/ext/x86_fast_rounding_control.hpp
-  interval/hw_rounding.hpp
-  interval/interval.hpp
-  interval/io.hpp
-  interval/limits.hpp
-  interval/policies.hpp
-  interval/rounded_arith.hpp
-  interval/rounded_transc.hpp
-  interval/rounding.hpp
-  interval/transc.hpp
-  interval/utility.hpp
-  interval/utility_fwd.hpp
-  ;
+# run them.
+path-constant INTERVAL_INCLUDE_DIR : ../include ;
 
 local self_contained_tests ;
 if [ os.environ BOOST_NUMERIC_INTERVAL_TEST_SELF_CONTAINED_HEADERS ]
 {
-  for local h in $(self_contained_headers)
+  local headers_path = [ path.make $(INTERVAL_INCLUDE_DIR)/boost/numeric ] ;
+  for local file in [ path.glob-tree $(headers_path) : *.hpp : detail ]
   {
-    local requirements = <define>BOOST_NUMERIC_INTERVAL_TEST_HEADER=$(h) ;
+    local h = [ path.relative-to $(headers_path) $(file) ] ;
+    local requirements = <define>BOOST_NUMERIC_INTERVAL_TEST_HEADER=$(h) <dependency>$(file) ;
     if $(h) = interval/ext/x86_fast_rounding_control.hpp
     {
       # x86 only by design.

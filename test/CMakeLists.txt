@@ -28,40 +28,16 @@ boost_test(TYPE compile SOURCES integer.cpp)
 
 # Each public header must compile on its own.  These compile-only tests are
 # slow and add little per configuration, so they are off by default and CI
-# turns them on in one job.  Keep the list in sync with Jamfile.v2.
+# turns them on in one job.
 option(BOOST_NUMERIC_INTERVAL_TEST_SELF_CONTAINED_HEADERS "Test that each public header compiles on its own" OFF)
 
 if(BOOST_NUMERIC_INTERVAL_TEST_SELF_CONTAINED_HEADERS)
-  set(headers
-    interval.hpp
-    interval/arith.hpp
-    interval/arith2.hpp
-    interval/arith3.hpp
-    interval/checking.hpp
-    interval/compare.hpp
-    interval/compare/certain.hpp
-    interval/compare/explicit.hpp
-    interval/compare/lexicographic.hpp
-    interval/compare/possible.hpp
-    interval/compare/set.hpp
-    interval/compare/tribool.hpp
-    interval/constants.hpp
-    interval/ext/integer.hpp
-    interval/hw_rounding.hpp
-    interval/interval.hpp
-    interval/io.hpp
-    interval/limits.hpp
-    interval/policies.hpp
-    interval/rounded_arith.hpp
-    interval/rounded_transc.hpp
-    interval/rounding.hpp
-    interval/transc.hpp
-    interval/utility.hpp
-    interval/utility_fwd.hpp
-  )
+  set(headers_path ${CMAKE_CURRENT_SOURCE_DIR}/../include/boost/numeric)
+  file(GLOB_RECURSE headers RELATIVE ${headers_path} CONFIGURE_DEPENDS ${headers_path}/*.hpp)
+  list(FILTER headers EXCLUDE REGEX "/detail/")
   # x86 only by design.
-  if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|x86|i[3-6]86)$")
-    list(APPEND headers interval/ext/x86_fast_rounding_control.hpp)
+  if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|x86|i[3-6]86)$")
+    list(REMOVE_ITEM headers interval/ext/x86_fast_rounding_control.hpp)
   endif()
 
   foreach(h IN LISTS headers)
