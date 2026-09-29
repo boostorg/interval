@@ -92,7 +92,7 @@ jobs:
           - { compiler: clang-19,  cxxstd: "11,14,17,20,23,2c", os: ubuntu-24.04 }
           - { compiler: clang-20,  cxxstd: "11,14,17,20,23,2c", os: ubuntu-latest, container: "ubuntu:25.04" }
           - { compiler: clang-21,  cxxstd: "11,14,17,20,23,2c", os: ubuntu-latest, container: "ubuntu:26.04" }
-          - { compiler: clang-22,  cxxstd: "11,14,17,20,23,2c", os: ubuntu-latest, container: "ubuntu:26.04" }
+          - { compiler: clang-22,  cxxstd: "11,14,17,20,23,2c", os: ubuntu-latest, container: "ubuntu:26.04", self_contained_headers: "yes" }
           - { compiler: icpx-2025, cxxstd: "11,14,17,20,23,2c", os: ubuntu-latest, container: "intel/oneapi-hpckit:2025.2.2-0-devel-ubuntu24.04" }
           # libc++
           - { name: "Clang w/ sanitizers", sanitize: "yes", stdlib: "libc++",
@@ -283,6 +283,7 @@ jobs:
             ${B2_WRAPPER:-} ./b2 libs/$SELF/test "${ARGS[@]}"
         env:
           UBSAN_OPTIONS: print_stacktrace=1,report_error_type=1
+          BOOST_NUMERIC_INTERVAL_TEST_SELF_CONTAINED_HEADERS: ${{ matrix.self_contained_headers }}
           BDDE_DISTRO: ${{ matrix.distro }}
           BDDE_EDITION: ${{ matrix.edition }}
           BDDE_ARCH: ${{ matrix.arch }}
@@ -506,7 +507,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: ubuntu-latest,       build_shared: "ON",  build_type: Debug, generator: "Unix Makefiles" }
+          - { os: ubuntu-latest,       build_shared: "ON",  build_type: Debug, generator: "Unix Makefiles", self_contained_headers: "yes" }
           - { os: ubuntu-latest,       build_shared: "OFF", build_type: Debug, generator: "Unix Makefiles" }
           - { os: windows-2022,        build_shared: "ON",  build_type: Debug, generator: "Visual Studio 17 2022" }
           - { os: windows-2022,        build_shared: "OFF", build_type: Debug, generator: "Visual Studio 17 2022" }
@@ -574,7 +575,7 @@ jobs:
         run: |
             cd "$BOOST_ROOT"
             mkdir __build_cmake_test__ && cd __build_cmake_test__
-            cmake -G "${{ matrix.generator }}" -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBOOST_INCLUDE_LIBRARIES=$SELF -DBUILD_SHARED_LIBS=${{ matrix.build_shared }} -DBUILD_TESTING=ON -DBoost_VERBOSE=ON ..
+            cmake -G "${{ matrix.generator }}" -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBOOST_INCLUDE_LIBRARIES=$SELF -DBUILD_SHARED_LIBS=${{ matrix.build_shared }} -DBUILD_TESTING=ON -DBoost_VERBOSE=ON ${{ matrix.self_contained_headers && '-DBOOST_NUMERIC_INTERVAL_TEST_SELF_CONTAINED_HEADERS=ON' || '' }} ..
             cmake --build . --target tests --config ${{ matrix.build_type }} -j3
             ctest --output-on-failure --no-tests=error --build-config ${{ matrix.build_type }}
 

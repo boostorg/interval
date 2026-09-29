@@ -26,10 +26,50 @@ set(BOOST_TEST_LINK_LIBRARIES Boost::numeric_interval Boost::core)
 
 boost_test(TYPE compile SOURCES integer.cpp)
 
-# Each compare header must compile on its own (clang rejects them otherwise).
-foreach(h certain possible lexicographic set tribool)
-  boost_test(TYPE compile SOURCES compare_${h}_self_contained.cpp)
-endforeach()
+# Each public header must compile on its own.  These compile-only tests are
+# slow and add little per configuration, so they are off by default and CI
+# turns them on in one job.  Keep the list in sync with Jamfile.v2.
+option(BOOST_NUMERIC_INTERVAL_TEST_SELF_CONTAINED_HEADERS "Test that each public header compiles on its own" OFF)
+
+if(BOOST_NUMERIC_INTERVAL_TEST_SELF_CONTAINED_HEADERS)
+  set(headers
+    interval.hpp
+    interval/arith.hpp
+    interval/arith2.hpp
+    interval/arith3.hpp
+    interval/checking.hpp
+    interval/compare.hpp
+    interval/compare/certain.hpp
+    interval/compare/explicit.hpp
+    interval/compare/lexicographic.hpp
+    interval/compare/possible.hpp
+    interval/compare/set.hpp
+    interval/compare/tribool.hpp
+    interval/constants.hpp
+    interval/ext/integer.hpp
+    interval/hw_rounding.hpp
+    interval/interval.hpp
+    interval/io.hpp
+    interval/limits.hpp
+    interval/policies.hpp
+    interval/rounded_arith.hpp
+    interval/rounded_transc.hpp
+    interval/rounding.hpp
+    interval/transc.hpp
+    interval/utility.hpp
+    interval/utility_fwd.hpp
+  )
+  # x86 only by design.
+  if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|x86|i[3-6]86)$")
+    list(APPEND headers interval/ext/x86_fast_rounding_control.hpp)
+  endif()
+
+  foreach(h IN LISTS headers)
+    string(MAKE_C_IDENTIFIER "${h}" name)
+    boost_test(TYPE compile NAME self_contained-${name} SOURCES self_contained_header.cpp
+      COMPILE_DEFINITIONS BOOST_NUMERIC_INTERVAL_TEST_HEADER=${h})
+  endforeach()
+endif()
 
 foreach(t add det fmod mul overflow pi pow cmp cmp_exp cmp_lex cmp_set test_float)
   boost_test(TYPE run SOURCES ${t}.cpp)

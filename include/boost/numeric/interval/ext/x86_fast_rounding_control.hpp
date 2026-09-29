@@ -17,6 +17,9 @@
 #ifndef BOOST_NUMERIC_INTERVAL_EXT_X86_FAST_ROUNDING_CONTROL_HPP
 #define BOOST_NUMERIC_INTERVAL_EXT_X86_FAST_ROUNDING_CONTROL_HPP
 
+#include <boost/numeric/interval/rounding.hpp>
+#include <boost/numeric/interval/detail/x86_rounding_control.hpp>
+
 namespace boost {
 namespace numeric {
 namespace interval_lib {
