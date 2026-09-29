@@ -11,13 +11,14 @@
 #ifndef BOOST_NUMERIC_INTERVAL_DETAIL_COMPARISON_ERROR_HPP
 #define BOOST_NUMERIC_INTERVAL_DETAIL_COMPARISON_ERROR_HPP
 
+#include <boost/config.hpp>
 #include <stdexcept>
 
 namespace boost {
 namespace numeric {
 namespace interval_lib {
 
-class comparison_error
+class BOOST_SYMBOL_VISIBLE comparison_error
   : public std::runtime_error
 {
 public:
