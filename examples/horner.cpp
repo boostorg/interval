@@ -11,7 +11,7 @@
 #include <boost/numeric/interval.hpp>
 #include <iostream>
 
-// I is an interval class, the polynom is a simple array
+// I is an interval class, the polynomial is a simple array
 template<class I>
 I horner(const I& x, const I p[], int n) {
 

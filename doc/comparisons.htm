@@ -14,14 +14,14 @@
   <h1>Comparisons</h1>
 
   <p>As was said before, the definition of the comparison operators induces a
-  slight problem. There are many ways to define them, depending of the return
+  slight problem. There are many ways to define them, depending on the return
   type or the expected order. It is the reason why the meaning of the
   operators is not fixed once and for all.</p>
 
   <p>The way the operators are defined could have been influenced by a
   policy, as it is already the case for the rounding and the checking.
-  However, comparisons are more an external property of the the class rather
-  than an internal one. They are meant to be locally modified, independantly
+  However, comparisons are more an external property of the class rather
+  than an internal one. They are meant to be locally modified, independently
   of the type of the intervals.</p>
 
   <p>The operators <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>,
@@ -30,7 +30,7 @@
   type. However, due to technical limitations, this base type can only be the
   second argument; so the operators are unfortunately not fully symmetric.
   The return type is not always <code>bool</code>, since some interesting
-  results can be achieved by using a tri-state return type. So here is the
+  results can be achieved by using a tri-state return type. So here are the
   common signatures of the operators:</p>
   <pre>
 template&lt;class T, class Policies1, class Policies2&gt;
@@ -44,9 +44,9 @@ return_type operator== (const interval&lt;T, Policies&gt;&amp;, const T&amp;);
 
   <h3>Default comparison</h3>
 
-  <p>If nothing is specified, the meaning of the comparison operators are an
+  <p>If nothing is specified, the meaning of the comparison operators is an
   extension of the operator on the base type. More precisely, if one of the
-  argument is invalid or empty, an exception is thrown. If the arguments are
+  arguments is invalid or empty, an exception is thrown. If the arguments are
   valid, the following rules are applied to determine the result of
   [<i>a</i>,<i>b</i>] <code>op</code> [<i>c</i>,<i>d</i>] (just consider
   <i>c</i> <code>==</code> <i>d</i> if the second argument is of type
@@ -55,11 +55,11 @@ return_type operator== (const interval&lt;T, Policies&gt;&amp;, const T&amp;);
   <ul>
     <li>if &forall; <i>x</i> &isin; [<i>a</i>,<i>b</i>] &forall; <i>y</i>
     &isin; [<i>c</i>,<i>d</i>] <code>(</code><i>x</i> <code>op</code>
-    y<code>)</code>, then <code>true</code></li>
+    <i>y</i><code>)</code>, then <code>true</code></li>
 
     <li>if &forall; <i>x</i> &isin; [<i>a</i>,<i>b</i>] &forall; <i>y</i>
     &isin; [<i>c</i>,<i>d</i>] <code>!(</code><i>x</i> <code>op</code>
-    y<code>)</code>, then <code>false</code></li>
+    <i>y</i><code>)</code>, then <code>false</code></li>
 
     <li>otherwise throw an exception.</li>
   </ul>
@@ -107,7 +107,7 @@ using namespace compare1;
   their respective header files under
   <code>&lt;boost/numeric/interval/compare/...&gt;</code>. And as for the
   default comparison, the operators will generally complain by throwing an
-  exception if feed by invalid values.</p>
+  exception if fed by invalid values.</p>
 
   <ul>
     <li><code>certain</code>: this comparison is equivalent to the default
@@ -122,7 +122,7 @@ using namespace compare1;
     <li><code>lexicographic</code>: the lexicographic order (the lower bounds
     are first compared, and if it is not enough to know the result, the upper
     bounds are then compared). This order does not have a meaning in interval
-    arithmetic. However, since it is the natural total order on pair of
+    arithmetic. However, since it is the natural total order on pairs of
     (totally ordered) numbers, it may be handy in some cases.</li>
 
     <li><code>set</code>: the set inclusion partial order. This time, an

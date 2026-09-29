@@ -1,5 +1,5 @@
 /* Boost examples/io.cpp
- * show some exampleso of i/o operators
+ * show some examples of i/o operators
  * thanks to all the people who commented on this point, particularly on
  * the Boost mailing-list
  *

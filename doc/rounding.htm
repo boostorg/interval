@@ -96,7 +96,7 @@ struct rounding {
   important semantic requirement: they are responsible for setting and
   resetting the rounding modes of the computation on T. For instance, if T is
   a standard floating point type and floating point computation is performed
-  according to the Standard IEEE 754, the constructor can save the current
+  according to the standard IEEE 754, the constructor can save the current
   rounding state, each <code>_up</code> (resp. <code>_down</code>) function
   will round up (resp. down), and the destructor will restore the saved
   rounding state. Indeed this is the behavior of the default rounding
@@ -115,7 +115,7 @@ struct rounding {
   must round down the value and the second one must round it up.</p>
 
   <p>The type <code>unprotected_rounding</code> allows to remove all
-  controls. For reasons why one might to do this, see the <a href=
+  controls. For reasons why one might want to do this, see the <a href=
   "#Protection">protection</a> paragraph below.</p>
 
   <h2>Overview of the provided classes</h2>
@@ -346,7 +346,7 @@ T d; { rounding::unprotected_rounding rnd; d = rnd.add_down(a, b); }
   valid values. For example, <code>cos_down</code> always returns -1. In this
   way, we do verify the inclusion property for the default implementation,
   even if this has strictly no value for the user. In order to have useful
-  values, another policy should be used explicitely, which will most likely
+  values, another policy should be used explicitly, which will most likely
   lead to a violation of the inclusion property. In this way, we ensure that
   the violation is clearly pointed out to the user who then knows what he
   stands against. This class could have been used as the default
@@ -468,7 +468,7 @@ template &lt;&gt; struct rounded_math&lt;long double&gt; : save_state&lt;rounded
   sets the floating point environment. This protection is done by the
   constructor and destructor of the rounding policy.</p>
 
-  <p>Les us now consider the case of two consecutive interval additions:
+  <p>Let us now consider the case of two consecutive interval additions:
   [<i>a</i>,<i>b</i>] + [<i>c</i>,<i>d</i>] + [<i>e</i>,<i>f</i>]. The
   generated code should look like:</p>
   <pre>
@@ -514,10 +514,10 @@ restore_rounding_mode(); // done by the user
 
   <h4 id="perfexp">Example</h4>
 
-  <p>Here is an example of Horner's scheme to compute the value of a polynom.
+  <p>Here is an example of Horner's scheme to compute the value of a polynomial.
   The rounding mode switches are disabled for the whole computation.</p>
   <pre>
-// I is an interval class, the polynom is a simple array
+// I is an interval class, the polynomial is a simple array
 template&lt;class I&gt;
 I horner(const I&amp; x, const I p[], int n) {
 
@@ -564,7 +564,7 @@ I horner(const I&amp; x, const I p[], int n) {
   done with double registers, or double computations with long double
   registers). Consequently, many problems can arise.</p>
 
-  <p>The first one is due to to the extended precision of the mantissa. The
+  <p>The first one is due to the extended precision of the mantissa. The
   rounding is also done on this extended precision. And consequently, we
   still have down(<i>a</i>+<i>b</i>) = -up(-<i>a</i>-<i>b</i>) in the
   extended registers. But back to the standard precision, we now have
