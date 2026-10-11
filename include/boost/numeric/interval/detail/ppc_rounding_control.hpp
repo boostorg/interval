@@ -24,14 +24,14 @@ namespace interval_lib {
 namespace detail {
 
 typedef union {
-   ::boost::long_long_type imode;
+   ::boost::ulong_long_type uimode;
   double dmode;
 } rounding_mode_struct;
 
-static const rounding_mode_struct mode_upward      = { (::boost::long_long_type)0xFFF8000000000002LL };
-static const rounding_mode_struct mode_downward    = { (::boost::long_long_type)0xFFF8000000000003LL };
-static const rounding_mode_struct mode_to_nearest  = { (::boost::long_long_type)0xFFF8000000000000LL };
-static const rounding_mode_struct mode_toward_zero = { (::boost::long_long_type)0xFFF8000000000001LL };
+static const rounding_mode_struct mode_upward      = { 0xFFF8000000000002ULL };
+static const rounding_mode_struct mode_downward    = { 0xFFF8000000000003ULL };
+static const rounding_mode_struct mode_to_nearest  = { 0xFFF8000000000000ULL };
+static const rounding_mode_struct mode_toward_zero = { 0xFFF8000000000001ULL };
 
 struct ppc_rounding_control
 {
