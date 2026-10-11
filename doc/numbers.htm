@@ -14,7 +14,7 @@
   <h1>Numbers Requirements</h1>
 
   <p>What we call "number" is the base type of the <code>interval</code>
-  class. The interval library expect a lot of properties from this base type
+  class. The interval library expects a lot of properties from this base type
   in order to respect the inclusion property. All these properties are
   already detailed in the other sections of this documentation; but we will
   try to summarize them here.</p>
@@ -26,7 +26,7 @@
   It must be a total order (reflexivity, antisymmetry, transitivity, and each
   pair of numbers is ordered). So <code>complex&lt;T&gt;</code> will not be a
   good candidate for the base type; if you need the inclusion property of
-  interval property, you should use <code>complex&lt; interval&lt;T&gt;
+  interval arithmetic, you should use <code>complex&lt; interval&lt;T&gt;
   &gt;</code> in place of <code>interval&lt; complex&lt;T&gt; &gt;</code>
   (but unfortunately, <code>complex</code> only provides specialization).</p>
 
@@ -129,7 +129,7 @@ template&lt;class T&gt; inline bool is_pos (T const &amp;v) { return v &gt;  sta
   <h3>Constants</h3>
 
   <p>In order for the trigonometric functions to correctly work, the library
-  need to know the value of the &pi; constant (and also &pi;/2 and 2&pi;).
+  needs to know the value of the &pi; constant (and also &pi;/2 and 2&pi;).
   Since these constants may not be representable in the base type, the
   library does not have to know the exact value: a lower bound and an upper
   bound are enough. If these values are not provided by the user, the default
@@ -142,7 +142,7 @@ template&lt;class T&gt; inline bool is_pos (T const &amp;v) { return v &gt;  sta
   defined for the base type. The rounding policy defines a lot of functions
   used by the interval library. So the arithmetic operators do not need to be
   defined for the base type (unless required by one of the predefined
-  classes). However, there is an exception: the unary minus need to be
+  classes). However, there is an exception: the unary minus needs to be
   defined. Moreover, this operator should only provide exact results; it is
   the reason why the rounding policy does not provide some negation
   functions.</p>

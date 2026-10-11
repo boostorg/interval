@@ -17,7 +17,7 @@
 
   <p>This example shows how to design a function which takes a polynomial and
   a value and returns the sign of this polynomial at this point. This
-  function is a filter: if the answer is not guaranteed, the functions says
+  function is a filter: if the answer is not guaranteed, the function says
   so. The reason of using a filter rather than a simple evaluation function
   is: computations with floating-point numbers will incur approximations and
   it can be enough to change the sign of the polynomial. So, in order to
@@ -107,7 +107,7 @@ int sign_polynomial(double x, double P[], int sz) {
 
   <p>In <code>libs/numeric/interval/test/</code> and
   <code>libs/numeric/interval/examples/</code> are some test and example
-  programs.. The examples illustrate a few uses of intervals. For a general
+  programs. The examples illustrate a few uses of intervals. For a general
   description and considerations on using this library, and some potential
   domains of application, please read this <a href=
   "guide.htm">mini-guide</a>.</p>
@@ -178,8 +178,8 @@ int sign_polynomial(double x, double P[], int sz) {
   operations for a whole function (which computes the value of a polynomial
   by using Horner scheme).</p>
 
-  <p><b>io.cpp</b> shows some stream input and output operators for intervals
-  .The wide variety of possibilities explains why the library do not
+  <p><b>io.cpp</b> shows some stream input and output operators for intervals.
+  The wide variety of possibilities explains why the library does not
   implement i/o operators and they are left to the user.</p>
 
   <p><b>newton-raphson.cpp</b> is an implementation of a specialized version
