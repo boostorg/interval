@@ -37,7 +37,9 @@ struct ppc_rounding_control
 {
   typedef double rounding_mode;
 
-  static void set_rounding_mode(const rounding_mode mode)
+  // Not inlined, so that the compiler does not move floating-point
+  // operations across the change of rounding mode.
+  BOOST_NOINLINE static void set_rounding_mode(const rounding_mode mode)
   { __asm__ __volatile__ ("mtfsf 255,%0" : : "f"(mode)); }
 
   static void get_rounding_mode(rounding_mode& mode)
@@ -77,7 +79,8 @@ template<>
 struct rounding_control<double>:
   detail::ppc_rounding_control
 {
-  static const double & force_rounding(const double& r) { return r; }
+  static double force_rounding(const double& r)
+  { volatile double r_ = r; return r_; }
   static double to_int(const double& r) { return rint(r); }
 };
 
@@ -85,7 +88,8 @@ template<>
 struct rounding_control<long double>:
   detail::ppc_rounding_control
 {
-  static const long double & force_rounding(const long double& r) { return r; }
+  static long double force_rounding(const long double& r)
+  { volatile long double r_ = r; return r_; }
   static long double to_int(const long double& r) { return rint(r); }
 };
 
