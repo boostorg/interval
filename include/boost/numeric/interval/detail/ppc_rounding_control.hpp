@@ -37,10 +37,10 @@ struct ppc_rounding_control
 {
   typedef double rounding_mode;
 
-  // Not inlined, so that the compiler does not move floating-point
-  // operations across the change of rounding mode.
-  BOOST_NOINLINE static void set_rounding_mode(const rounding_mode mode)
-  { __asm__ __volatile__ ("mtfsf 255,%0" : : "f"(mode)); }
+  // The "memory" clobber makes the instruction a compiler fence, so that
+  // rounded results are not moved across the change of rounding mode.
+  static void set_rounding_mode(const rounding_mode mode)
+  { __asm__ __volatile__ ("mtfsf 255,%0" : : "f"(mode) : "memory"); }
 
   static void get_rounding_mode(rounding_mode& mode)
   { __asm__ __volatile__ ("mffs %0" : "=f"(mode)); }
