@@ -109,6 +109,9 @@ jobs:
           # Big-Endian
           - { name: "Big Endian w/ Clang on s390x", multiarch: "yes",
               compiler: clang,     cxxstd: "17",                os: ubuntu-latest, distro: fedora, edition: "34", arch: s390x }
+          # PowerPC
+          - { name: "PowerPC64LE w/ GCC", multiarch: "yes",
+              compiler: gcc,       cxxstd: "17",                os: ubuntu-latest, distro: fedora, edition: "34", arch: ppc64le }
 
     container:
       image: ${{ matrix.container }}
