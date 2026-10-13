@@ -54,6 +54,11 @@ endforeach()
 boost_test(TYPE run SOURCES cmp_exn.cpp LINK_LIBRARIES Boost::logic)
 boost_test(TYPE run SOURCES cmp_tribool.cpp LINK_LIBRARIES Boost::logic)
 
+# PowerPC-only regression test.
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)")
+  boost_test(TYPE run SOURCES rounding_mode.cpp)
+endif()
+
 # MSVC-only regression test (b2: <build>no <toolset>msvc:<build>yes).
 if(MSVC)
   boost_test(TYPE run SOURCES msvc_x64_flags.cpp)

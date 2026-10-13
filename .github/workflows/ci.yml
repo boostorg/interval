@@ -109,6 +109,14 @@ jobs:
           # Big-Endian
           - { name: "Big Endian w/ Clang on s390x", multiarch: "yes",
               compiler: clang,     cxxstd: "17",                os: ubuntu-latest, distro: fedora, edition: "34", arch: s390x }
+          # PowerPC
+          - { name: "PowerPC w/ GCC on ppc64le", multiarch: "yes",
+              compiler: gcc,       cxxstd: "17",                os: ubuntu-latest, distro: fedora, edition: "34", arch: ppc64le }
+          - { name: "PowerPC w/ Clang on ppc64le", multiarch: "yes",
+              compiler: clang,     cxxstd: "17",                os: ubuntu-latest, distro: fedora, edition: "34", arch: ppc64le }
+          - { name: "PowerPC w/ GCC on ppc64le, IEEE long double", multiarch: "yes",
+              compiler: gcc,       cxxstd: "17",                os: ubuntu-latest, distro: fedora, edition: "34", arch: ppc64le,
+              b2_flags: "cxxflags=-mabi=ieeelongdouble cxxflags=-Wno-psabi linkflags=-mabi=ieeelongdouble" }
 
     container:
       image: ${{ matrix.container }}
@@ -280,6 +288,7 @@ jobs:
             [ -z "${{ matrix.address-model }}" ] || ARGS+=(address-model=${{ matrix.address-model }})
             [ -z "${{ matrix.stdlib }}" ] || ARGS+=(stdlib=${{ matrix.stdlib }})
             [ "${{ matrix.sanitize }}" != "yes" ] || ARGS+=(address-sanitizer=norecover undefined-sanitizer=norecover)
+            ARGS+=(${{ matrix.b2_flags }})
             ${B2_WRAPPER:-} ./b2 libs/$SELF/test "${ARGS[@]}"
         env:
           UBSAN_OPTIONS: print_stacktrace=1,report_error_type=1

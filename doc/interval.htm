@@ -71,7 +71,14 @@
       <ul>
         <li>clang (though v9) does not have proper
           <a href="http://lists.llvm.org/pipermail/llvm-dev/2018-May/123529.html">rounding support</a>.</li>
-        <li>clang (10+) requires <tt>-frounding-math</tt> to be specified.</li>
+        <li>clang (10+) requires <tt>-frounding-math</tt> to be specified.
+            With this option alone, clang can still move a floating-point
+            operation across a change of rounding mode. On x86-64 this has
+            been observed for <code>long double</code> with clang 14, 15
+            and 18; it has not been observed for <code>float</code> and
+            <code>double</code>. Specifying <tt>-ftrapping-math</tt> or
+            <tt>-ffp-exception-behavior=strict</tt> in addition prevents
+            it.</li>
         <li>gcc requires <tt>-frounding-math</tt> to be specified.</li>
         <li>msvc requires <tt>/fp:strict</tt> to be specified, which means
             MSVC 10.0 and earlier will not work properly.</li>
@@ -80,8 +87,14 @@
 
     <li>Sparc hardware is supported with GCC and Sun compiler.</li>
 
-    <li>PowerPC hardware is supported with GCC and CodeWarrior, when
-    floating-point computations are not done with the Altivec unit.</li>
+    <li>PowerPC hardware is supported with GCC, clang and CodeWarrior, when
+    floating-point computations are not done with the Altivec unit. GCC and
+    clang require <tt>-frounding-math</tt> to be specified. clang moves
+    floating-point operations across the instruction that changes the
+    rounding mode, unless <tt>-ftrapping-math</tt> or
+    <tt>-ffp-exception-behavior=strict</tt> is specified. So that results
+    are correct without these options, the library changes the rounding mode
+    through a function call when it is compiled with clang.</li>
 
     <li>Alpha hardware is supported with GCC, except maybe for the square
     root. The options <code>-mfp-rounding-mode=d -mieee</code> have to be
