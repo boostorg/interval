@@ -92,10 +92,10 @@ struct rounded_arith_opp: Rounding {
 # define BOOST_UP_NEG(EXPR) return -this->force_rounding(EXPR)
   template<class U> T conv_down(U const &v) { BOOST_UP_NEG(-v); }
   template<class U> T conv_up  (U const &v) { BOOST_UP(v); }
-  T add_down(const T& x, const T& y) { BOOST_UP_NEG((-x) - y); }
+  T add_down(const T& x, const T& y) { BOOST_UP_NEG(this->force_rounding(-x) - y); }
   T sub_down(const T& x, const T& y) { BOOST_UP_NEG(y - x); }
-  T mul_down(const T& x, const T& y) { BOOST_UP_NEG(x * (-y)); }
-  T div_down(const T& x, const T& y) { BOOST_UP_NEG(x / (-y)); }
+  T mul_down(const T& x, const T& y) { BOOST_UP_NEG(x * this->force_rounding(-y)); }
+  T div_down(const T& x, const T& y) { BOOST_UP_NEG(x / this->force_rounding(-y)); }
   T add_up  (const T& x, const T& y) { BOOST_UP(x + y); }
   T sub_up  (const T& x, const T& y) { BOOST_UP(x - y); }
   T mul_up  (const T& x, const T& y) { BOOST_UP(x * y); }
