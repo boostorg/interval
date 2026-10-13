@@ -39,6 +39,11 @@ struct ppc_rounding_control
 
   // The "memory" clobber makes the instruction a compiler fence, so that
   // rounded results are not moved across the change of rounding mode.
+  // Clang moves floating-point operations across it nonetheless, so the
+  // change of rounding mode is kept behind a function call there.
+#if defined(__clang__)
+  BOOST_NOINLINE
+#endif
   static void set_rounding_mode(const rounding_mode mode)
   { __asm__ __volatile__ ("mtfsf 255,%0" : : "f"(mode) : "memory"); }
 
@@ -94,11 +99,16 @@ struct rounding_control<long double>:
 {
   static long double force_rounding(const long double& r)
   {
-    // Which register can hold a long double depends on the ABI: FPRs for
-    // IBM double-double and 64-bit long double, a VSX register for IEEE
-    // 128-bit. Clang accepts neither in all cases, hence the memory fallback.
     long double r_ = r;
+#if __SIZEOF_LONG_DOUBLE__ == 8
+    // Same format as double.
+    __asm__ __volatile__ ("" : "+d"(r_));
+#else
+    // Which register can hold a 128-bit long double depends on the ABI: FPRs
+    // for IBM double-double, a VSX register for IEEE 128-bit. Clang accepts
+    // neither in all cases, hence the memory fallback.
     __asm__ __volatile__ ("" : "+wa,d,m"(r_));
+#endif
     return r_;
   }
   static long double to_int(const long double& r) { return rint(r); }
