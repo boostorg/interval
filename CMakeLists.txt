@@ -17,6 +17,7 @@ target_link_libraries(boost_numeric_interval
     Boost::config
     Boost::detail
     Boost::logic
+    Boost::type_traits
 )
 
 if(BUILD_TESTING AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test/CMakeLists.txt")

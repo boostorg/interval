@@ -57,6 +57,13 @@ if [ os.environ BOOST_NUMERIC_INTERVAL_TEST_SELF_CONTAINED_HEADERS ]
     $(self_contained_tests)
 
     [ run add.cpp      ]
+    [ run converting_ctor.cpp ]
+    [ compile converting_ctor_fail.cpp ]
+    [ compile-fail converting_ctor_fail.cpp : <define>BOOST_NUMERIC_INTERVAL_TEST_FAIL=1 : converting_ctor_fail_1 ]
+    [ compile-fail converting_ctor_fail.cpp : <define>BOOST_NUMERIC_INTERVAL_TEST_FAIL=2 : converting_ctor_fail_2 ]
+    [ compile-fail converting_ctor_fail.cpp : <define>BOOST_NUMERIC_INTERVAL_TEST_FAIL=3 : converting_ctor_fail_3 ]
+    [ compile-fail converting_ctor_fail.cpp : <define>BOOST_NUMERIC_INTERVAL_TEST_FAIL=4 : converting_ctor_fail_4 ]
+    [ compile-fail converting_ctor_fail.cpp : <define>BOOST_NUMERIC_INTERVAL_TEST_FAIL=5 : converting_ctor_fail_5 ]
     [ run det.cpp      ]
     [ run fmod.cpp     ]
     [ run msvc_x64_flags.cpp : : : <build>no <toolset>msvc:<build>yes ]

@@ -12,6 +12,8 @@
 
 #include <stdexcept>
 #include <string>
+#include <boost/type_traits/enable_if.hpp>
+#include <boost/type_traits/is_convertible.hpp>
 #include <boost/numeric/interval/detail/interval_prototype.hpp>
 #include <boost/numeric/interval/detail/comparison_error.hpp>
 
@@ -28,6 +30,10 @@ class interval
 private:
   struct interval_holder;
   struct number_holder;
+  // Type of the defaulted last parameter of the converting constructors,
+  // which removes them from overload resolution when an argument is not
+  // convertible to T. A private type avoids misuse.
+  struct enabler {};
 public:
   typedef T base_type;
   typedef Policies traits_type;
@@ -37,15 +43,20 @@ public:
 
   interval();
   interval(T const &v);
-  template<class T1> interval(T1 const &v);
+  template<class T1> interval(T1 const &v,
+    typename boost::enable_if_<boost::is_convertible<T1, T>::value, enabler>::type = enabler());
   interval(T const &l, T const &u);
-  template<class T1, class T2> interval(T1 const &l, T2 const &u);
+  template<class T1, class T2> interval(T1 const &l, T2 const &u,
+    typename boost::enable_if_<boost::is_convertible<T1, T>::value &&
+                               boost::is_convertible<T2, T>::value, enabler>::type = enabler());
   interval(interval<T, Policies> const &r);
   template<class Policies1> interval(interval<T, Policies1> const &r);
   template<class T1, class Policies1> interval(interval<T1, Policies1> const &r);
 
   interval &operator=(T const &v);
-  template<class T1> interval &operator=(T1 const &v);
+  template<class T1>
+  typename boost::enable_if_<boost::is_convertible<T1, T>::value, interval<T, Policies> &>::type
+  operator=(T1 const &v);
   interval &operator=(interval<T, Policies> const &r);
   template<class Policies1> interval &operator=(interval<T, Policies1> const &r);
   template<class T1, class Policies1> interval &operator=(interval<T1, Policies1> const &r);
@@ -131,7 +142,8 @@ interval<T, Policies>::interval(T const &v): low(v), up(v)
 }
 
 template<class T, class Policies> template<class T1> inline
-interval<T, Policies>::interval(T1 const &v)
+interval<T, Policies>::interval(T1 const &v,
+  typename boost::enable_if_<boost::is_convertible<T1, T>::value, enabler>::type)
 {
   if (checking::is_nan(v)) set_empty();
   else {
@@ -142,7 +154,9 @@ interval<T, Policies>::interval(T1 const &v)
 }
 
 template<class T, class Policies> template<class T1, class T2> inline
-interval<T, Policies>::interval(T1 const &l, T2 const &u)
+interval<T, Policies>::interval(T1 const &l, T2 const &u,
+  typename boost::enable_if_<boost::is_convertible<T1, T>::value &&
+                             boost::is_convertible<T2, T>::value, enabler>::type)
 {
   if (checking::is_nan(l) || checking::is_nan(u) || !(l <= u)) set_empty();
   else {
@@ -192,7 +206,8 @@ interval<T, Policies> &interval<T, Policies>::operator=(T const &v)
 }
 
 template<class T, class Policies> template<class T1> inline
-interval<T, Policies> &interval<T, Policies>::operator=(T1 const &v)
+typename boost::enable_if_<boost::is_convertible<T1, T>::value, interval<T, Policies> &>::type
+interval<T, Policies>::operator=(T1 const &v)
 {
   if (checking::is_nan(v)) set_empty();
   else {
