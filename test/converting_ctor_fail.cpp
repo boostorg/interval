@@ -31,12 +31,15 @@ int main() {
 #elif BOOST_NUMERIC_INTERVAL_TEST_FAIL == 1
   // constructor from a type that does not convert to the base type
   I y(std::string("abc"));
+  (void)y;
 #elif BOOST_NUMERIC_INTERVAL_TEST_FAIL == 2
   // implicit conversion
   I y = u;
+  (void)y;
 #elif BOOST_NUMERIC_INTERVAL_TEST_FAIL == 3
   // two-argument constructor with one bound that does not convert
   I y(1., u);
+  (void)y;
 #elif BOOST_NUMERIC_INTERVAL_TEST_FAIL == 4
   // assignment
   x = std::string("abc");
@@ -44,6 +47,7 @@ int main() {
   // a stray pointer must not be taken for the parameter that constrains
   // the one-argument constructor
   I y(1., &u);
+  (void)y;
 #endif
   (void)u;
   return 0;
