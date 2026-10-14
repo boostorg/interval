@@ -18,6 +18,10 @@
 typedef boost::numeric::interval<double> I;
 
 struct unrelated {};
+typedef boost::numeric::interval<unrelated> U;
+
+// declared only; the statements that use it never compile
+U const &make_u();
 
 int f(I const &) { return 1; }
 int f(std::string const &) { return 2; }
@@ -48,6 +52,13 @@ int main() {
   // the one-argument constructor
   I y(1., &u);
   (void)y;
+#elif BOOST_NUMERIC_INTERVAL_TEST_FAIL == 6
+  // constructor from an interval whose base type does not convert
+  I y(make_u());
+  (void)y;
+#elif BOOST_NUMERIC_INTERVAL_TEST_FAIL == 7
+  // assignment from such an interval
+  x = make_u();
 #endif
   (void)u;
   return 0;

@@ -498,9 +498,10 @@ class interval
   assign function that directly takes an interval or only one number as a
   parameter; just use the assignment operators in such a case.</p>
 
-  <p>The template constructors and the template assignment operator take
-  part in overload resolution only if each of their argument types is
-  implicitly convertible to the base number type. Other types, such as
+  <p>The template constructors and the template assignment operators take
+  part in overload resolution only if each of their argument types, or the
+  base number type of an interval argument, is implicitly convertible to the
+  base number type. Other types, such as
   pointers or unrelated classes, are therefore not convertible to an
   interval. A type that converts to the base number type only explicitly is
   not accepted either; convert the value first, as in

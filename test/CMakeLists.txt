@@ -58,7 +58,7 @@ boost_test(TYPE run SOURCES converting_ctor.cpp)
 # One statement that must not compile per value of the macro; without the
 # macro the file must compile.
 boost_test(TYPE compile SOURCES converting_ctor_fail.cpp)
-foreach(n 1 2 3 4 5)
+foreach(n 1 2 3 4 5 6 7)
   boost_test(TYPE compile-fail NAME converting_ctor_fail_${n} SOURCES converting_ctor_fail.cpp
     COMPILE_DEFINITIONS BOOST_NUMERIC_INTERVAL_TEST_FAIL=${n})
 endforeach()

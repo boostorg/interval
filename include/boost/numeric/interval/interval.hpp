@@ -51,7 +51,8 @@ public:
                                boost::is_convertible<T2, T>::value, enabler>::type = enabler());
   interval(interval<T, Policies> const &r);
   template<class Policies1> interval(interval<T, Policies1> const &r);
-  template<class T1, class Policies1> interval(interval<T1, Policies1> const &r);
+  template<class T1, class Policies1> interval(interval<T1, Policies1> const &r,
+    typename boost::enable_if_<boost::is_convertible<T1, T>::value, enabler>::type = enabler());
 
   interval &operator=(T const &v);
   template<class T1>
@@ -59,7 +60,9 @@ public:
   operator=(T1 const &v);
   interval &operator=(interval<T, Policies> const &r);
   template<class Policies1> interval &operator=(interval<T, Policies1> const &r);
-  template<class T1, class Policies1> interval &operator=(interval<T1, Policies1> const &r);
+  template<class T1, class Policies1>
+  typename boost::enable_if_<boost::is_convertible<T1, T>::value, interval<T, Policies> &>::type
+  operator=(interval<T1, Policies1> const &r);
  
   void assign(const T& l, const T& u);
 
@@ -186,7 +189,8 @@ interval<T, Policies>::interval(interval<T, Policies1> const &r): low(r.lower())
 }
 
 template<class T, class Policies> template<class T1, class Policies1> inline
-interval<T, Policies>::interval(interval<T1, Policies1> const &r)
+interval<T, Policies>::interval(interval<T1, Policies1> const &r,
+  typename boost::enable_if_<boost::is_convertible<T1, T>::value, enabler>::type)
 {
   typedef typename Policies1::checking checking1;
   if (checking1::is_empty(r.lower(), r.upper())) set_empty();
@@ -239,7 +243,8 @@ interval<T, Policies> &interval<T, Policies>::operator=(interval<T, Policies1> c
 }
 
 template<class T, class Policies> template<class T1, class Policies1> inline
-interval<T, Policies> &interval<T, Policies>::operator=(interval<T1, Policies1> const &r)
+typename boost::enable_if_<boost::is_convertible<T1, T>::value, interval<T, Policies> &>::type
+interval<T, Policies>::operator=(interval<T1, Policies1> const &r)
 {
   typedef typename Policies1::checking checking1;
   if (checking1::is_empty(r.lower(), r.upper())) set_empty();

@@ -18,6 +18,14 @@ typedef boost::numeric::interval<double> I;
 typedef boost::numeric::interval<float> F;
 
 struct unrelated {};
+typedef boost::numeric::interval<unrelated> U;
+
+// same base type as I, different policies
+typedef boost::numeric::interval<double,
+  boost::numeric::interval_lib::policies<
+    boost::numeric::interval_lib::save_state<
+      boost::numeric::interval_lib::rounded_transc_std<double> >,
+    boost::numeric::interval_lib::checking_no_nan<double> > > N;
 
 // Hides x from the optimizer: GCC up to 11 converts a double constant to float
 // at compile time in round-to-nearest, even with -frounding-math, so a literal
@@ -43,12 +51,6 @@ struct explicit_num {
   explicit explicit_num(double x): v(x) {}
   explicit operator double() const { return v; }
 };
-
-typedef boost::numeric::interval<double,
-  boost::numeric::interval_lib::policies<
-    boost::numeric::interval_lib::save_state<
-      boost::numeric::interval_lib::rounded_transc_std<double> >,
-    boost::numeric::interval_lib::checking_no_nan<double> > > N;
 #endif
 
 // An interval must not claim to be convertible from a type that cannot be
@@ -58,6 +60,8 @@ void test_traits() {
   BOOST_TEST_TRAIT_FALSE((boost::is_convertible<unrelated, I>));
   BOOST_TEST_TRAIT_FALSE((boost::is_convertible<void*, I>));
   BOOST_TEST_TRAIT_FALSE((boost::is_convertible<const char*, I>));
+  BOOST_TEST_TRAIT_FALSE((boost::is_convertible<U, I>));
+  BOOST_TEST_TRAIT_FALSE((boost::is_convertible<boost::numeric::interval<std::string>, I>));
 
   BOOST_TEST_TRAIT_TRUE((boost::is_convertible<double, I>));
   BOOST_TEST_TRAIT_TRUE((boost::is_convertible<int, I>));
@@ -67,6 +71,8 @@ void test_traits() {
   BOOST_TEST_TRAIT_TRUE((boost::is_convertible<double, F>));
   BOOST_TEST_TRAIT_TRUE((boost::is_convertible<F, I>));
   BOOST_TEST_TRAIT_TRUE((boost::is_convertible<I, F>));
+  BOOST_TEST_TRAIT_TRUE((boost::is_convertible<N, I>));
+  BOOST_TEST_TRAIT_TRUE((boost::is_convertible<I, N>));
 
 #if !defined(BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS)
   // an explicit conversion to the base type must not become an implicit
@@ -79,12 +85,17 @@ void test_traits() {
 int f(I const &) { return 1; }
 int f(std::string const &) { return 2; }
 
+int g(I const &) { return 1; }
+int g(U const &) { return 2; }
+
 // A string literal converts to std::string only, so the call is not
 // ambiguous.
 void test_overload() {
   BOOST_TEST_EQ(f("abc"), 2);
   BOOST_TEST_EQ(f(1), 1);
   BOOST_TEST_EQ(f(1.5f), 1);
+  // float converts to double only, so only one of the intervals can be built
+  BOOST_TEST_EQ(g(F(1.5f)), 1);
 }
 
 void test_constructors() {
@@ -146,6 +157,29 @@ void test_assignment() {
   BOOST_TEST_EQ(a.upper(), static_cast<double>(x.upper()));
 }
 
+void test_interval_conversion() {
+  // same base type, different policies: the bounds are copied
+  N n(1., 2.);
+  I a(n);
+  BOOST_TEST_EQ(a.lower(), 1.);
+  BOOST_TEST_EQ(a.upper(), 2.);
+
+  a = N(3., 4.);
+  BOOST_TEST_EQ(a.lower(), 3.);
+  BOOST_TEST_EQ(a.upper(), 4.);
+
+  // different base type: the bounds go through the rounding policy
+  I d(runtime(0.1), runtime(0.3));
+  F x(d);
+  BOOST_TEST(static_cast<double>(x.lower()) <= 0.1);
+  BOOST_TEST(0.3 <= static_cast<double>(x.upper()));
+
+  x = I(runtime(0.1));
+  BOOST_TEST(x.lower() < x.upper());
+  BOOST_TEST(static_cast<double>(x.lower()) <= 0.1);
+  BOOST_TEST(0.1 <= static_cast<double>(x.upper()));
+}
+
 // A type that converts to the base type only explicitly is converted by the
 // user first; the result then goes through the usual constructors.
 void test_explicit_conversion() {
@@ -178,6 +212,7 @@ int main() {
   test_overload();
   test_constructors();
   test_assignment();
+  test_interval_conversion();
   test_explicit_conversion();
   return boost::report_errors();
 }
