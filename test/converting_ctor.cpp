@@ -19,6 +19,16 @@ typedef boost::numeric::interval<float> F;
 
 struct unrelated {};
 
+// Hides x from the optimizer: GCC up to 11 converts a double constant to float
+// at compile time in round-to-nearest, even with -frounding-math, so a literal
+// would not test the rounding policy.
+double runtime(double x) {
+#if defined(__GNUC__)
+  __asm__ __volatile__ ("" : "+m"(x));
+#endif
+  return x;
+}
+
 // a number type that is not the base type but converts to it
 struct num {
   double v;
@@ -101,12 +111,12 @@ void test_constructors() {
 
   // 0.1 is not representable in float, so the conversion has to round
   // outward
-  F x(0.1);
+  F x(runtime(0.1));
   BOOST_TEST(x.lower() < x.upper());
   BOOST_TEST(static_cast<double>(x.lower()) <= 0.1);
   BOOST_TEST(0.1 <= static_cast<double>(x.upper()));
 
-  F y(0.1, 0.3);
+  F y(runtime(0.1), runtime(0.3));
   BOOST_TEST(static_cast<double>(y.lower()) <= 0.1);
   BOOST_TEST(0.3 <= static_cast<double>(y.upper()));
 }
@@ -126,7 +136,7 @@ void test_assignment() {
   BOOST_TEST_EQ(a.upper(), 4.);
 
   F x;
-  x = 0.1;
+  x = runtime(0.1);
   BOOST_TEST(x.lower() < x.upper());
   BOOST_TEST(static_cast<double>(x.lower()) <= 0.1);
   BOOST_TEST(0.1 <= static_cast<double>(x.upper()));
@@ -140,7 +150,7 @@ void test_assignment() {
 // user first; the result then goes through the usual constructors.
 void test_explicit_conversion() {
 #if !defined(BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS)
-  explicit_num n(0.1), m(0.3);
+  explicit_num n(runtime(0.1)), m(runtime(0.3));
 
   I a(static_cast<double>(n));
   BOOST_TEST_EQ(a.lower(), 0.1);
