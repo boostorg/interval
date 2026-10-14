@@ -26,6 +26,21 @@ struct num {
   operator double() const { return v; }
 };
 
+#if !defined(BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS)
+// a number type that converts to the base type only explicitly
+struct explicit_num {
+  double v;
+  explicit explicit_num(double x): v(x) {}
+  explicit operator double() const { return v; }
+};
+
+typedef boost::numeric::interval<double,
+  boost::numeric::interval_lib::policies<
+    boost::numeric::interval_lib::save_state<
+      boost::numeric::interval_lib::rounded_transc_std<double> >,
+    boost::numeric::interval_lib::checking_no_nan<double> > > N;
+#endif
+
 // An interval must not claim to be convertible from a type that cannot be
 // converted to its base type.
 void test_traits() {
@@ -42,6 +57,13 @@ void test_traits() {
   BOOST_TEST_TRAIT_TRUE((boost::is_convertible<double, F>));
   BOOST_TEST_TRAIT_TRUE((boost::is_convertible<F, I>));
   BOOST_TEST_TRAIT_TRUE((boost::is_convertible<I, F>));
+
+#if !defined(BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS)
+  // an explicit conversion to the base type must not become an implicit
+  // conversion to the interval
+  BOOST_TEST_TRAIT_FALSE((boost::is_convertible<explicit_num, I>));
+  BOOST_TEST_TRAIT_FALSE((boost::is_convertible<explicit_num, N>));
+#endif
 }
 
 int f(I const &) { return 1; }
@@ -114,10 +136,38 @@ void test_assignment() {
   BOOST_TEST_EQ(a.upper(), static_cast<double>(x.upper()));
 }
 
+// A type that converts to the base type only explicitly is converted by the
+// user first; the result then goes through the usual constructors.
+void test_explicit_conversion() {
+#if !defined(BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS)
+  explicit_num n(0.1), m(0.3);
+
+  I a(static_cast<double>(n));
+  BOOST_TEST_EQ(a.lower(), 0.1);
+  BOOST_TEST_EQ(a.upper(), 0.1);
+
+  N b(static_cast<double>(n), static_cast<double>(m));
+  BOOST_TEST_EQ(b.lower(), 0.1);
+  BOOST_TEST_EQ(b.upper(), 0.3);
+
+  b = static_cast<double>(m);
+  BOOST_TEST_EQ(b.lower(), 0.3);
+  BOOST_TEST_EQ(b.upper(), 0.3);
+
+  // the conversion to float still goes through the rounding policy and
+  // rounds outward
+  F x(static_cast<double>(n));
+  BOOST_TEST(x.lower() < x.upper());
+  BOOST_TEST(static_cast<double>(x.lower()) <= 0.1);
+  BOOST_TEST(0.1 <= static_cast<double>(x.upper()));
+#endif
+}
+
 int main() {
   test_traits();
   test_overload();
   test_constructors();
   test_assignment();
+  test_explicit_conversion();
   return boost::report_errors();
 }
