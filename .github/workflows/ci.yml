@@ -255,6 +255,9 @@ jobs:
                         CXX=clang++
                     else
                         CXX="$(brew --prefix "llvm@$ver")/bin/clang++"
+                        # HomeBrew clang defaults to the Command Line Tools SDK, which can be newer than
+                        # the linker of the selected Xcode understands. Use the SDK of the selected Xcode.
+                        echo "SDKROOT=$(xcrun --show-sdk-path)" >> "$GITHUB_ENV"
                     fi
                 fi
             elif [[ "$compiler" =~ icpx ]]; then
