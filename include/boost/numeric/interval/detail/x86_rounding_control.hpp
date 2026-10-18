@@ -19,9 +19,22 @@
 #  include <boost/numeric/interval/detail/msvc_rounding_control.hpp>
 #elif defined(__MWERKS__) || defined(__ICC) || defined (__SUNPRO_CC)
 #  define BOOST_NUMERIC_INTERVAL_USE_C99_SUBSYSTEM
-#  include <boost/numeric/interval/detail/c99sub_rounding_control.hpp>
 #else
 #  error Unsupported C++ compiler.
+#endif
+
+// On x86 the rounding mode lives in two places: the x87 control word and
+// MXCSR, which governs the SSE unit.  fldcw and _control87 reach the x87
+// word only, so code that computes in SSE registers (64-bit code, 32-bit
+// code built with -mfpmath=sse, libm routines) ignored the requested mode
+// (issue #23).  fesetround sets both, and leaves the exception masks and the
+// precision control as it found them (issue #35), so it is used wherever
+// <fenv.h> is available.
+#if !defined(BOOST_NO_FENV_H) && !defined(BOOST_NUMERIC_INTERVAL_USE_C99_SUBSYSTEM)
+#  define BOOST_NUMERIC_INTERVAL_USE_C99_SUBSYSTEM
+#endif
+#ifdef BOOST_NUMERIC_INTERVAL_USE_C99_SUBSYSTEM
+#  include <boost/numeric/interval/detail/c99sub_rounding_control.hpp>
 #endif
 
 namespace boost {
@@ -30,10 +43,6 @@ namespace interval_lib {
 
 namespace detail {
 
-#ifdef BOOST_NUMERIC_INTERVAL_USE_C99_SUBSYSTEM
-typedef c99_rounding_control x86_rounding_control;
-#undef BOOST_NUMERIC_INTERVAL_USE_C99_SUBSYSTEM
-#else
 struct fpu_rounding_modes
 {
   unsigned short to_nearest;
@@ -42,6 +51,20 @@ struct fpu_rounding_modes
   unsigned short toward_zero;
 };
 
+#ifdef BOOST_NUMERIC_INTERVAL_USE_C99_SUBSYSTEM
+#  if defined(__GNUC__) || defined(__BORLANDC__) && defined(__clang__)
+// rint takes and returns a double; x86_rounding::to_int rounds in the x87
+// unit and keeps every bit of a long double.
+struct x86_rounding_control: c99_rounding_control
+{
+  template<class T>
+  static T to_int(T r) { return x86_rounding::to_int(r); }
+};
+#  else
+typedef c99_rounding_control x86_rounding_control;
+#  endif
+#  undef BOOST_NUMERIC_INTERVAL_USE_C99_SUBSYSTEM
+#else
 // exceptions masked, extended precision
 // hardware default is 0x037f (0x1000 only has a meaning on 287)
 static const fpu_rounding_modes rnd_mode = { 0x137f, 0x177f, 0x1b7f, 0x1f7f };

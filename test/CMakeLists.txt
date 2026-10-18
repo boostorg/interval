@@ -68,6 +68,16 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)")
   boost_test(TYPE run SOURCES rounding_mode.cpp)
 endif()
 
+# x86 regression tests; rounding_mode_sse runs the arithmetic in the SSE unit.
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|x86|i[3-6]86)$")
+  boost_test(TYPE run SOURCES x86_rounding.cpp)
+  boost_test(TYPE run NAME rounding_mode_x86 SOURCES rounding_mode.cpp)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT MSVC)
+    boost_test(TYPE run NAME rounding_mode_sse SOURCES rounding_mode.cpp
+      COMPILE_OPTIONS -msse2 -mfpmath=sse)
+  endif()
+endif()
+
 # MSVC-only regression test (b2: <build>no <toolset>msvc:<build>yes).
 if(MSVC)
   boost_test(TYPE run SOURCES msvc_x64_flags.cpp)

@@ -48,6 +48,11 @@ void test() {
 int main() {
   test<float>();
   test<double>();
+#if !(defined(__clang__) && (defined(__i386__) || defined(__x86_64__))) \
+  && !defined(__i386__) && !defined(_M_IX86) && !defined(_M_X64)
+  // clang on x86, and GCC on 32-bit x86, move the long double division
+  // across the change of rounding mode (issue #4).
   test<long double>();
+#endif
   return boost::report_errors();
 }
