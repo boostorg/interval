@@ -427,6 +427,9 @@ jobs:
       matrix:
         include:
           - { toolset: msvc-14.3, cxxstd: "14,17,20,latest", address-model: "32,64", os: windows-2022 }
+          # The _control87 path used before VS 2013, which has no <fenv.h>
+          - { name: "msvc-14.3, no fenv", b2_flags: "define=BOOST_NO_FENV_H",
+              toolset: msvc-14.3, cxxstd: "14,latest",          address-model: "32,64", os: windows-2022 }
           - { toolset: msvc-14.5, cxxstd: "14,17,20,latest", address-model: "32,64", os: windows-2025-vs2026 }
           - { toolset: msvc,      cxxstd: "14,17,20,latest", address-model: "64",    os: windows-11-arm }
           - { name: "Collect coverage w/ VS 2022", coverage: "yes",
