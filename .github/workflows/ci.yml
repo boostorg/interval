@@ -257,6 +257,8 @@ jobs:
                         CXX="$(brew --prefix "llvm@$ver")/bin/clang++"
                         # HomeBrew clang defaults to the Command Line Tools SDK, which can be newer than
                         # the linker of the selected Xcode understands. Use the SDK of the selected Xcode.
+                        # Its default config file passes -isysroot, which overrides SDKROOT, so skip it.
+                        echo "CLANG_NO_DEFAULT_CONFIG=1" >> "$GITHUB_ENV"
                         echo "SDKROOT=$(xcrun --show-sdk-path)" >> "$GITHUB_ENV"
                     fi
                 fi
