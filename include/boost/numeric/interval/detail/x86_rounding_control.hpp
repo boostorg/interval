@@ -108,11 +108,21 @@ struct x86_rounding_control_long_double<false>: x86_rounding_control
   { volatile long double r_ = r; return r_; }
 };
 
+// An x87 long double needs no rounding to memory, but the result must still be
+// computed before the next change of rounding mode: a mode change does not
+// order arithmetic done in registers, and GCC 16 moves it past fesetround.
+// The empty asm takes the value as an operand, which makes the computation a
+// dependency of it, and the "memory" clobber makes it a compiler fence.
 template<>
 struct x86_rounding_control_long_double<true>: x86_rounding_control
 {
-  static long double const &force_rounding(long double const &r)
-  { return r; }
+#if defined(__GNUC__)
+  static long double force_rounding(long double r)
+  { __asm__ __volatile__ ("" : "+t"(r) : : "memory"); return r; }
+#else
+  static long double force_rounding(long double const &r)
+  { volatile long double r_ = r; return r_; }
+#endif
 };
 
 } // namespace detail
