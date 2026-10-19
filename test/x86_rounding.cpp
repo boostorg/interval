@@ -14,9 +14,18 @@
 #include <boost/numeric/interval.hpp>
 #include <boost/core/lightweight_test.hpp>
 
+#if defined(BOOST_NO_FENV_H) && defined(__GNUC__)
+// Without <fenv.h>, GCC and clang set the x87 control word only.
+#  define BOOST_INTERVAL_TEST_X87_ONLY
+#endif
+
 #if !(defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64))
 
 int main() { return 0; } // x86 only
+
+#elif defined(BOOST_INTERVAL_TEST_X87_ONLY) && defined(__SSE_MATH__)
+
+int main() { return 0; } // SSE arithmetic does not follow the x87 mode
 
 #else
 
@@ -89,7 +98,9 @@ void test() {
   // Each mode reaches both units, and only the rounding bits change.
   for (unsigned m = 0; m < 4; ++m) {
     set_mode[m]();
+#if !defined(BOOST_INTERVAL_TEST_X87_ONLY)
     BOOST_TEST_EQ(mxcsr(), (csr & ~0x6000u) | m << 13);
+#endif
 #if defined(__GNUC__)
     BOOST_TEST_EQ(x87cw(), (cw & ~0xc00u) | m << 10);
 #elif defined(_M_IX86)

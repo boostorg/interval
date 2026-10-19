@@ -65,16 +65,23 @@ typedef c99_rounding_control x86_rounding_control;
 #  endif
 #  undef BOOST_NUMERIC_INTERVAL_USE_C99_SUBSYSTEM
 #else
-// exceptions masked, extended precision
-// hardware default is 0x037f (0x1000 only has a meaning on 287)
-static const fpu_rounding_modes rnd_mode = { 0x137f, 0x177f, 0x1b7f, 0x1f7f };
+// The rounding control field of the x87 control word, bits 10 and 11.  Only
+// this field is changed: the exception masks and the precision control are
+// left as the user set them (issue #35).
+static const fpu_rounding_modes rnd_mode = { 0x0000, 0x0400, 0x0800, 0x0c00 };
 
 struct x86_rounding_control: x86_rounding
 {
-  static void to_nearest()  { set_rounding_mode(rnd_mode.to_nearest);  }
-  static void downward()    { set_rounding_mode(rnd_mode.downward);    }
-  static void upward()      { set_rounding_mode(rnd_mode.upward);      }
-  static void toward_zero() { set_rounding_mode(rnd_mode.toward_zero); }
+  static void set_rounding_control(unsigned short rc)
+  {
+    rounding_mode mode;
+    get_rounding_mode(mode);
+    set_rounding_mode(static_cast<rounding_mode>((mode & ~0x0c00u) | rc));
+  }
+  static void to_nearest()  { set_rounding_control(rnd_mode.to_nearest);  }
+  static void downward()    { set_rounding_control(rnd_mode.downward);    }
+  static void upward()      { set_rounding_control(rnd_mode.upward);      }
+  static void toward_zero() { set_rounding_control(rnd_mode.toward_zero); }
 };
 #endif // BOOST_NUMERIC_INTERVAL_USE_C99_SUBSYSTEM
 

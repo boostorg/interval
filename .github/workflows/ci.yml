@@ -77,6 +77,8 @@ jobs:
           - { compiler: gcc-13,    cxxstd: "11,14,17,20,2b",    os: ubuntu-24.04 }
           - { name: "Coverage w/ GCC on Linux", coverage: "yes",
               compiler: gcc-13,    cxxstd: "2b",                os: ubuntu-24.04, install: "g++-13-multilib gcc-multilib", address-model: "32,64" }
+          - { name: "GCC 32-bit, no fenv", b2_flags: "define=BOOST_NO_FENV_H",
+              compiler: gcc-13,    cxxstd: "03,20",             os: ubuntu-24.04, install: "g++-13-multilib gcc-multilib", address-model: "32" }
           - { name: "GCC w/ sanitizers", sanitize: "yes",
               compiler: gcc-13,    cxxstd: "11,14,17,20",       os: ubuntu-24.04 }
           - { compiler: gcc-14,    cxxstd: "11,14,17,20,23",    os: ubuntu-24.04 }

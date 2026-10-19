@@ -46,8 +46,12 @@ void test() {
 }
 
 int main() {
+#if !(defined(BOOST_NO_FENV_H) && defined(__GNUC__) && defined(__SSE_MATH__))
+  // Without <fenv.h>, GCC and clang on x86 set the x87 control word only,
+  // which SSE arithmetic ignores (issue #23).
   test<float>();
   test<double>();
+#endif
 #if !(defined(__clang__) && (defined(__i386__) || defined(__x86_64__))) \
   && !defined(__i386__) && !defined(_M_IX86) && !defined(_M_X64)
   // clang on x86, and GCC on 32-bit x86, move the long double division
