@@ -10,7 +10,8 @@
 # Self-contained CI.  It runs the same jobs on the same platforms as the
 # Boost.CI reusable workflow this repository used before, with the settings
 # it passed to it:
-#   - MinGW disabled (https://github.com/boostorg/interval/issues/41)
+#   - MinGW disabled (https://github.com/boostorg/interval/issues/41); 32-bit
+#     MinGW from MSYS2 is tested again, since the fix for that issue
 #   - clang before 11 excluded: clang < 10 does not support the necessary
 #     floating point options (-frounding-math) and clang 10 has a C++20
 #     ambiguous operator resolution bug
@@ -438,6 +439,9 @@ jobs:
               toolset: msvc-14.5, cxxstd: "latest",          address-model: "64",    os: windows-2025-vs2026 }
           - { toolset: clang-win, cxxstd: "14,17,latest",    address-model: "32,64", os: windows-2025, b2_flags: "embed-manifest-via=linker" }
           - { toolset: gcc,       cxxstd: "11,14,17,2a",     address-model: "64",    os: windows-2022 }
+          # 32-bit x87 code from a current GCC (#41)
+          - { name: "gcc, MinGW32", msystem: MINGW32, msys2-package: mingw-w64-i686-gcc,
+              toolset: gcc,       cxxstd: "03,11,14,17,20",  address-model: "32",    os: windows-2025 }
           - { toolset: gcc,       cxxstd: "11,14,17,2a",     address-model: "32",    os: windows-2025, target-os: cygwin }
           - { toolset: gcc,       cxxstd: "11,14,17,2a",     address-model: "64",    os: windows-2025, target-os: cygwin }
 
@@ -451,6 +455,22 @@ jobs:
           site: ${{ matrix.address-model == '64' && 'https://www.mirrorservice.org/sites/sourceware.org/pub/cygwin' || 'https://ftp-stud.hs-esslingen.de/pub/Mirrors/sources.redhat.com/cygwin-archive/20221123' }}
           packages: coreutils, gcc-g++, libstdc++6, make, moreutils, openssl, libbz2-devel, libgmp-devel, libicu-devel, libjpeg-devel, libmpfr-devel, libpng-devel, libssl-devel, libtiff-devel, libxslt-devel, libzstd-devel
           platform: ${{ matrix.address-model == '64' && 'x86_64' || 'x86' }}
+
+      - name: Setup MSYS2
+        if: matrix.msystem
+        id: msys2
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
+        with:
+          msystem: ${{ matrix.msystem }}
+          install: ${{ matrix.msys2-package }}
+          update: false
+
+      - name: Put the MSYS2 compiler first in PATH
+        if: matrix.msystem
+        shell: bash
+        run: |
+            msystem='${{ matrix.msystem }}'
+            echo '${{ steps.msys2.outputs.msys2-location }}'"\\${msystem,,}\\bin" >> "$GITHUB_PATH"
 
       - name: Setup Boost
         run: |
