@@ -18,6 +18,37 @@ namespace boost {
 namespace numeric {
 namespace interval_lib {
 
+namespace detail {
+
+// Square root in the current rounding mode.  The sqrt of the 32-bit
+// Microsoft runtime rounds to nearest whatever the mode, so use the x87
+// instruction there, as msvc_rounding_control.hpp does for rint.
+template<class T> inline T sqrt_rounded(const T& x)
+{ BOOST_NUMERIC_INTERVAL_using_math(sqrt); return sqrt(x); }
+
+#if defined(_MSC_VER) && defined(_M_IX86)
+inline float sqrt_rounded(const float& x)
+{
+  float v = x;
+  __asm fld v
+  __asm fsqrt
+  __asm fstp v
+  return v;
+}
+inline double sqrt_rounded(const double& x)
+{
+  double v = x;
+  __asm fld v
+  __asm fsqrt
+  __asm fstp v
+  return v;
+}
+inline long double sqrt_rounded(const long double& x)
+{ return sqrt_rounded(static_cast<double>(x)); }  // same format on MSVC
+#endif
+
+} // namespace detail
+
 /*
  * Three classes of rounding: exact, std, opp
  * See documentation for details.
@@ -65,9 +96,9 @@ struct rounded_arith_std: Rounding {
   T div_up  (const T& x, const T& y) { BOOST_UP(x / y); }
   T median(const T& x, const T& y) { BOOST_NR((x + y) / 2); }
   T sqrt_down(const T& x)
-  { BOOST_NUMERIC_INTERVAL_using_math(sqrt); BOOST_DN(sqrt(x)); }
+  { BOOST_DN(detail::sqrt_rounded(x)); }
   T sqrt_up  (const T& x)
-  { BOOST_NUMERIC_INTERVAL_using_math(sqrt); BOOST_UP(sqrt(x)); }
+  { BOOST_UP(detail::sqrt_rounded(x)); }
   T int_down(const T& x) { this->downward(); return this->to_int(x); }
   T int_up  (const T& x) { this->upward();   return this->to_int(x); }
 # undef BOOST_DN
@@ -102,9 +133,9 @@ struct rounded_arith_opp: Rounding {
   T div_up  (const T& x, const T& y) { BOOST_UP(x / y); }
   T median  (const T& x, const T& y) { BOOST_NR((x + y) / 2); }
   T sqrt_down(const T& x)
-  { BOOST_NUMERIC_INTERVAL_using_math(sqrt); BOOST_DN(sqrt(x)); }
+  { BOOST_DN(detail::sqrt_rounded(x)); }
   T sqrt_up  (const T& x)
-  { BOOST_NUMERIC_INTERVAL_using_math(sqrt); BOOST_UP(sqrt(x)); }
+  { BOOST_UP(detail::sqrt_rounded(x)); }
   T int_down(const T& x) { return -this->to_int(-x); }
   T int_up  (const T& x) { return  this->to_int(x); }
 # undef BOOST_DN
