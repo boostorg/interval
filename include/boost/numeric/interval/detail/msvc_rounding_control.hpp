@@ -25,6 +25,8 @@ namespace numeric {
 namespace interval_lib {
 namespace detail {
 
+// With <fenv.h> available, c99sub_rounding_control.hpp declares rint.
+#if defined(BOOST_NO_FENV_H)
 #if BOOST_MSVC < 1400 || defined(_WIN64)
 extern "C" { double rint(double); }
 #else
@@ -34,6 +36,7 @@ _asm FLD [x] ;
 _asm FRNDINT ;
 //_asm RET ;
 }
+#endif
 #endif
 
 struct x86_rounding
@@ -87,21 +90,11 @@ struct x86_rounding
   typedef unsigned short rounding_mode;
   static void get_rounding_mode(rounding_mode& mode)
   { mode = msvc2hard(_control87(0, 0)); }
+  // Only the rounding control bits: the exception masks and the precision
+  // control belong to the user (issue #35).  x64 also asserts in the Debug
+  // CRT when _MCW_PC or _MCW_IC is passed to _control87 (ticket #4964).
   static void set_rounding_mode(const rounding_mode mode)
-  {
-    _control87(hard2msvc(mode),
-      _MCW_EM | _MCW_RC
-#if !defined(_M_AMD64) && !defined(_M_ARM) && !defined(_M_ARM64)
-      // x64 ignores _MCW_PC and _MCW_IC, and the Debug CRT library actually
-      // asserts when these are passed to _control87.
-      // MSDN says on '_control87' that changing precision (_MCW_PC) or
-      // infinity (_MCW_IC) handling is not supported on the ARM and x64
-      // architectures and that _control87 raises an assertion
-      // and the invalid parameter handler is invoked.
-      | _MCW_PC | _MCW_IC
-#endif
-    );
-  }
+  { _control87(hard2msvc(mode), _MCW_RC); }
   static double to_int(const double& x) { return rint(x); }
 };
 
