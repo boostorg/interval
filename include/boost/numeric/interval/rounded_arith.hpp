@@ -13,6 +13,9 @@
 #include <boost/numeric/interval/rounding.hpp>
 #include <boost/numeric/interval/detail/bugs.hpp>
 #include <boost/config/no_tr1/cmath.hpp>
+#if defined(_MSC_VER) && defined(_M_IX86) && _M_IX86_FP >= 1
+#  include <emmintrin.h>
+#endif
 
 namespace boost {
 namespace numeric {
@@ -21,12 +24,23 @@ namespace interval_lib {
 namespace detail {
 
 // Square root in the current rounding mode.  The sqrt of the 32-bit
-// Microsoft runtime rounds to nearest whatever the mode, so use the x87
-// instruction there, as msvc_rounding_control.hpp does for rint.
+// Microsoft runtime rounds to nearest whatever the mode, so use the square
+// root instruction directly there.
 template<class T> inline T sqrt_rounded(const T& x)
 { BOOST_NUMERIC_INTERVAL_using_math(sqrt); return sqrt(x); }
 
 #if defined(_MSC_VER) && defined(_M_IX86)
+// Use the unit the compiler uses for the rest of the arithmetic on the type,
+// which /arch selects and _M_IX86_FP reports:
+//   /arch:IA32  (0): float and double on x87
+//   /arch:SSE   (1): float on SSE, double on x87
+//   /arch:SSE2  (2): float and double on SSE2 (the default)
+// This avoids moving the value between units, and relies only on the
+// rounding mode of the unit the type already uses.
+# if _M_IX86_FP >= 1
+inline float sqrt_rounded(const float& x)
+{ return _mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(x))); }
+# else
 inline float sqrt_rounded(const float& x)
 {
   float v = x;
@@ -35,6 +49,11 @@ inline float sqrt_rounded(const float& x)
   __asm fstp v
   return v;
 }
+# endif
+# if _M_IX86_FP >= 2
+inline double sqrt_rounded(const double& x)
+{ return _mm_cvtsd_f64(_mm_sqrt_sd(_mm_setzero_pd(), _mm_set_sd(x))); }
+# else
 inline double sqrt_rounded(const double& x)
 {
   double v = x;
@@ -43,6 +62,7 @@ inline double sqrt_rounded(const double& x)
   __asm fstp v
   return v;
 }
+# endif
 inline long double sqrt_rounded(const long double& x)
 { return sqrt_rounded(static_cast<double>(x)); }  // same format on MSVC
 #endif
