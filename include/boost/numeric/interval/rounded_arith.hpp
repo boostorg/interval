@@ -44,7 +44,8 @@ inline float sqrt_rounded(const float& x)
 inline float sqrt_rounded(const float& x)
 {
   float v = x;
-  __asm {
+  __asm
+  {
     fld v
     fsqrt
     fstp v
@@ -54,12 +55,13 @@ inline float sqrt_rounded(const float& x)
 # endif
 # if _M_IX86_FP >= 2
 inline double sqrt_rounded(const double& x)
-{ return _mm_cvtsd_f64(_mm_sqrt_sd(_mm_setzero_pd(), _mm_set_sd(x))); }
+{ __m128d mm_x = _mm_set_sd(x); return _mm_cvtsd_f64(_mm_sqrt_sd(mm_x, mm_x)); }
 # else
 inline double sqrt_rounded(const double& x)
 {
   double v = x;
-  __asm {
+  __asm
+  {
     fld v
     fsqrt
     fstp v
