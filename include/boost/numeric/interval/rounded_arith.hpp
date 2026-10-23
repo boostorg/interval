@@ -23,6 +23,19 @@ namespace interval_lib {
 
 namespace detail {
 
+// Read a floating operand back through a volatile object. Two square roots
+// of the same operand taken under different rounding modes must not be
+// merged by the optimiser (GCC bug 34678); reading the operand afresh after
+// the mode change makes each evaluation depend on a value the compiler
+// cannot reuse. Used only inside the sqrt bodies below.
+template<class T> inline T reload_operand(const T& x) { return x; }
+inline float reload_operand(const float& x)
+{ volatile float v = x; return v; }
+inline double reload_operand(const double& x)
+{ volatile double v = x; return v; }
+inline long double reload_operand(const long double& x)
+{ volatile long double v = x; return v; }
+
 // Square root in the current rounding mode.  The sqrt of the 32-bit
 // Microsoft runtime rounds to nearest whatever the mode, so use the square
 // root instruction directly there.
@@ -122,9 +135,9 @@ struct rounded_arith_std: Rounding {
   T div_up  (const T& x, const T& y) { BOOST_UP(x / y); }
   T median(const T& x, const T& y) { BOOST_NR((x + y) / 2); }
   T sqrt_down(const T& x)
-  { BOOST_DN(detail::sqrt_rounded(x)); }
+  { BOOST_DN(detail::sqrt_rounded(detail::reload_operand(x))); }
   T sqrt_up  (const T& x)
-  { BOOST_UP(detail::sqrt_rounded(x)); }
+  { BOOST_UP(detail::sqrt_rounded(detail::reload_operand(x))); }
   T int_down(const T& x) { this->downward(); return this->to_int(x); }
   T int_up  (const T& x) { this->upward();   return this->to_int(x); }
 # undef BOOST_DN
@@ -159,9 +172,9 @@ struct rounded_arith_opp: Rounding {
   T div_up  (const T& x, const T& y) { BOOST_UP(x / y); }
   T median  (const T& x, const T& y) { BOOST_NR((x + y) / 2); }
   T sqrt_down(const T& x)
-  { BOOST_DN(detail::sqrt_rounded(x)); }
+  { BOOST_DN(detail::sqrt_rounded(detail::reload_operand(x))); }
   T sqrt_up  (const T& x)
-  { BOOST_UP(detail::sqrt_rounded(x)); }
+  { BOOST_UP(detail::sqrt_rounded(detail::reload_operand(x))); }
   T int_down(const T& x) { return -this->to_int(-x); }
   T int_up  (const T& x) { return  this->to_int(x); }
 # undef BOOST_DN
