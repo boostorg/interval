@@ -434,7 +434,14 @@ jobs:
               toolset: msvc-14.3, cxxstd: "latest",          address-model: "64",    os: windows-2022 }
           - { name: "Collect coverage w/ VS 2026", coverage: "yes",
               toolset: msvc-14.5, cxxstd: "latest",          address-model: "64",    os: windows-2025-vs2026 }
+          # 32-bit code for the x87 unit only, and for SSE2 (the default)
+          - { name: "msvc-14.3, /arch:IA32",
+              toolset: msvc-14.3, cxxstd: "14,latest",       address-model: "32",    os: windows-2022, b2_flags: "cxxflags=/arch:IA32" }
+          - { name: "msvc-14.3, /arch:SSE2",
+              toolset: msvc-14.3, cxxstd: "14,latest",       address-model: "32",    os: windows-2022, b2_flags: "cxxflags=/arch:SSE2" }
           - { toolset: clang-win, cxxstd: "14,17,latest",    address-model: "32,64", os: windows-2025, b2_flags: "embed-manifest-via=linker" }
+          - { name: "clang-win, /arch:IA32",
+              toolset: clang-win, cxxstd: "14,latest",       address-model: "32",    os: windows-2025, b2_flags: "embed-manifest-via=linker cxxflags=/arch:IA32" }
           - { toolset: gcc,       cxxstd: "11,14,17,2a",     address-model: "64",    os: windows-2022 }
           # 32-bit x87 code from a current GCC (#41)
           - { name: "gcc, MinGW32", msystem: MINGW32, msys2-package: mingw-w64-i686-gcc,
