@@ -44,9 +44,11 @@ inline float sqrt_rounded(const float& x)
 inline float sqrt_rounded(const float& x)
 {
   float v = x;
-  __asm fld v
-  __asm fsqrt
-  __asm fstp v
+  __asm {
+    fld v
+    fsqrt
+    fstp v
+  }
   return v;
 }
 # endif
@@ -57,9 +59,11 @@ inline double sqrt_rounded(const double& x)
 inline double sqrt_rounded(const double& x)
 {
   double v = x;
-  __asm fld v
-  __asm fsqrt
-  __asm fstp v
+  __asm {
+    fld v
+    fsqrt
+    fstp v
+  }
   return v;
 }
 # endif
