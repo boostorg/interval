@@ -75,6 +75,7 @@ if [ os.environ BOOST_NUMERIC_INTERVAL_TEST_SELF_CONTAINED_HEADERS ]
     [ run pi.cpp       ]
     [ run pow.cpp      ]
     [ run sqrt_rounding.cpp ]
+    [ run sqrt_point.cpp ]
     [ run rounding_mode.cpp : : : [ check-target-builds /boost/architecture//power : : <build>no ] ]
 
     [ run cmp.cpp ]
