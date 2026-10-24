@@ -77,6 +77,15 @@ if [ os.environ BOOST_NUMERIC_INTERVAL_TEST_SELF_CONTAINED_HEADERS ]
     [ run sqrt_rounding.cpp ]
     [ run sqrt_point.cpp ]
     [ run rounding_mode.cpp : : : [ check-target-builds /boost/architecture//power : : <build>no ] ]
+    [ run rounding_mode.cpp : : : [ check-target-builds /boost/architecture//x86 : : <build>no ]
+      : rounding_mode_x86 ]
+    # The same test with the arithmetic in the SSE unit, where only MXCSR
+    # matters; on 64-bit targets the flags are the default.
+    [ run rounding_mode.cpp : : : [ check-target-builds /boost/architecture//x86 : : <build>no ]
+        <toolset>gcc:<cxxflags>"-msse2 -mfpmath=sse"
+        <toolset>clang:<cxxflags>"-msse2 -mfpmath=sse"
+      : rounding_mode_sse ]
+    [ run x86_rounding.cpp : : : [ check-target-builds /boost/architecture//x86 : : <build>no ] ]
 
     [ run cmp.cpp ]
     [ run cmp_exn.cpp : : : <library>/boost/logic//boost_logic ]
