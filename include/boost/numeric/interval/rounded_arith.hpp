@@ -23,11 +23,12 @@ namespace interval_lib {
 
 namespace detail {
 
-// Read a floating operand back through a volatile object. Two square roots
-// of the same operand taken under different rounding modes must not be
-// merged by the optimiser (GCC bug 34678); reading the operand afresh after
-// the mode change makes each evaluation depend on a value the compiler
-// cannot reuse. Used only inside the sqrt bodies below.
+// Read a floating operand back through a volatile object. The compiler does
+// not see a rounding-mode change as a dependency, so it may compute the same
+// expression once for both ends of an interval (GCC bug 34678); reading one
+// operand afresh after the mode change makes each evaluation depend on a
+// value the compiler cannot reuse. Used by the rounded_arith_std primitives
+// and the sqrt bodies below.
 template<class T> inline T reload_operand(const T& x) { return x; }
 inline float reload_operand(const float& x)
 { volatile float v = x; return v; }
@@ -123,16 +124,16 @@ struct rounded_arith_std: Rounding {
 # define BOOST_NR(EXPR) this->to_nearest(); return this->force_rounding(EXPR)
 # define BOOST_UP(EXPR) this->upward();     return this->force_rounding(EXPR)
   void init() { }
-  template<class U> T conv_down(U const &v) { BOOST_DN(v); }
-  template<class U> T conv_up  (U const &v) { BOOST_UP(v); }
-  T add_down(const T& x, const T& y) { BOOST_DN(x + y); }
-  T sub_down(const T& x, const T& y) { BOOST_DN(x - y); }
-  T mul_down(const T& x, const T& y) { BOOST_DN(x * y); }
-  T div_down(const T& x, const T& y) { BOOST_DN(x / y); }
-  T add_up  (const T& x, const T& y) { BOOST_UP(x + y); }
-  T sub_up  (const T& x, const T& y) { BOOST_UP(x - y); }
-  T mul_up  (const T& x, const T& y) { BOOST_UP(x * y); }
-  T div_up  (const T& x, const T& y) { BOOST_UP(x / y); }
+  template<class U> T conv_down(U const &v) { BOOST_DN(detail::reload_operand(v)); }
+  template<class U> T conv_up  (U const &v) { BOOST_UP(detail::reload_operand(v)); }
+  T add_down(const T& x, const T& y) { BOOST_DN(detail::reload_operand(x) + y); }
+  T sub_down(const T& x, const T& y) { BOOST_DN(detail::reload_operand(x) - y); }
+  T mul_down(const T& x, const T& y) { BOOST_DN(detail::reload_operand(x) * y); }
+  T div_down(const T& x, const T& y) { BOOST_DN(detail::reload_operand(x) / y); }
+  T add_up  (const T& x, const T& y) { BOOST_UP(detail::reload_operand(x) + y); }
+  T sub_up  (const T& x, const T& y) { BOOST_UP(detail::reload_operand(x) - y); }
+  T mul_up  (const T& x, const T& y) { BOOST_UP(detail::reload_operand(x) * y); }
+  T div_up  (const T& x, const T& y) { BOOST_UP(detail::reload_operand(x) / y); }
   T median(const T& x, const T& y) { BOOST_NR((x + y) / 2); }
   T sqrt_down(const T& x)
   { BOOST_DN(detail::sqrt_rounded(detail::reload_operand(x))); }
