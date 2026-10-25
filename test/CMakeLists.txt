@@ -47,7 +47,7 @@ if(BOOST_NUMERIC_INTERVAL_TEST_SELF_CONTAINED_HEADERS)
   endforeach()
 endif()
 
-foreach(t add det fmod mul nth_root overflow pi pow sqrt_rounding sqrt_point cmp cmp_exp cmp_lex cmp_set test_float)
+foreach(t add det fmod mul nth_root overflow pi pow rounding_merge sqrt_rounding sqrt_point cmp cmp_exp cmp_lex cmp_set test_float)
   boost_test(TYPE run SOURCES ${t}.cpp)
 endforeach()
 

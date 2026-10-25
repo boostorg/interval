@@ -10,12 +10,14 @@
 // rounding mode, so sqrt_down and sqrt_up returned the same value there.
 //
 // sqrt is correctly rounded, so for a non-square x the two ends must differ,
-// and for an exact square both must be the exact root.  Each call reads its
-// operand from volatile storage, so that GCC cannot merge the two roots of
-// the same operand (a separate bug, GCC bug 34678).
+// and for an exact square both must be the exact root.  Both calls take the
+// same plain local operand, so the test also fails if the compiler merges
+// the two roots across the mode change (GCC bug 34678).  Only the input
+// arrays are volatile, so that nothing is folded at build time.
 
 #include <boost/numeric/interval.hpp>
 #include <boost/core/lightweight_test.hpp>
+#include <boost/limits.hpp>
 
 template<class Rounding, class T>
 void test_policy()
@@ -28,16 +30,14 @@ void test_policy()
     Rounding rnd;
     T a = non_squares[i];
     T dn = rnd.sqrt_down(a);
-    T b = non_squares[i];
-    T up = rnd.sqrt_up(b);
+    T up = rnd.sqrt_up(a);
     BOOST_TEST(dn < up);
   }
   for (int i = 0; i < n_sq; ++i) {
     Rounding rnd;
     T a = squares[i];
     T dn = rnd.sqrt_down(a);
-    T b = squares[i];
-    T up = rnd.sqrt_up(b);
+    T up = rnd.sqrt_up(a);
     T x = squares[i];
     BOOST_TEST(dn == up);
     BOOST_TEST(dn * dn == x);
@@ -56,10 +56,9 @@ int main()
 {
   test<float>();
   test<double>();
-  // Only where long double has the format of double, as with MSVC.  An x87
-  // long double result is not yet ordered before the next mode change, which
-  // is a separate bug.
-  if (sizeof(long double) == sizeof(double))
+  // IBM double-double long double (106 bits) does not follow the rounding
+  // mode.
+  if (std::numeric_limits<long double>::digits != 106)
     test<long double>();
   return boost::report_errors();
 }
