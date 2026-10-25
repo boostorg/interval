@@ -40,7 +40,7 @@ struct x86_rounding
   static T to_int(T r)
   {
     T r_;
-    __asm__ ("frndint" : "=&t"(r_) : "0"(r));
+    __asm__ __volatile__ ("frndint" : "=&t"(r_) : "0"(r));
     return r_;
   }
 };
