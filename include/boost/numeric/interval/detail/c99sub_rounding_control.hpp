@@ -18,7 +18,7 @@ namespace numeric {
 namespace interval_lib {
 namespace detail {
 
-extern "C" { double rint(double); }
+extern "C" { double rint(double); long double rintl(long double); }
 
 struct c99_rounding_control
 {
@@ -33,6 +33,7 @@ struct c99_rounding_control
 
   template<class T>
   static T to_int(const T& r) { return rint(r); }
+  static long double to_int(const long double& r) { return rintl(r); }
 };
 
 } // namespace detail

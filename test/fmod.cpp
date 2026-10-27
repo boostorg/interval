@@ -14,6 +14,7 @@
 #include <boost/numeric/interval/utility.hpp>
 #include <boost/numeric/interval/checking.hpp>
 #include <boost/numeric/interval/rounding.hpp>
+#include <boost/numeric/interval/hw_rounding.hpp>
 #include <boost/core/lightweight_test.hpp>
 #include "bugs.hpp"
 
@@ -35,6 +36,15 @@ using namespace interval_lib;
 
 typedef change_rounding<interval<int>, save_state_nothing<my_rounded_arith> >::type I;
 
+// to_int must round a long double with rintl: rint converts it to double
+// first, and fmod(2^60 + 1, 1) then misses 0.
+void test_long_double() {
+  typedef interval<long double> L;
+  if (std::numeric_limits<long double>::digits < 62) return;
+  long double big = 1152921504606846977.0L, one = 1;  // 2^60 + 1
+  BOOST_TEST(in_zero(fmod(L(big), L(one))));
+}
+
 int main() {
 
   BOOST_TEST(equal(fmod(I(6,9), 7), I(6,9)));
@@ -48,6 +58,8 @@ int main() {
   BOOST_TEST(equal(fmod(I(-17,-13), 7), I(4,8)));
   BOOST_TEST(equal(fmod(-17, I(7,8)), I(4,7)));
   BOOST_TEST(equal(fmod(I(-17,-13), I(7,8)), I(4,11)));
+
+  test_long_double();
 
   return boost::report_errors();
 }
