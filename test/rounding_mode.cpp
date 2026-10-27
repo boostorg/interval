@@ -45,9 +45,21 @@ void test() {
   BOOST_TEST(div_down<T>(one, three) < div_up<T>(one, three));
 }
 
+// Exact constants reach force_rounding once the division is folded; GCC
+// used to reject the PowerPC long double asm then.
+template<class T>
+void test_constant() {
+  typedef boost::numeric::interval<T> I;
+  I q = I(6) / I(2);
+  BOOST_TEST(q.lower() == 3 && q.upper() == 3);
+}
+
 int main() {
   test<float>();
   test<double>();
   test<long double>();
+  test_constant<float>();
+  test_constant<double>();
+  test_constant<long double>();
   return boost::report_errors();
 }

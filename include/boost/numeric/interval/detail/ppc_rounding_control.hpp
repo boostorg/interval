@@ -103,11 +103,14 @@ struct rounding_control<long double>:
 #if __SIZEOF_LONG_DOUBLE__ == 8
     // Same format as double.
     __asm__ __volatile__ ("" : "+d"(r_));
+#elif defined(__clang__)
+    // Clang has no register constraint that works for both 128-bit ABIs.
+    __asm__ __volatile__ ("" : "+m"(r_));
 #else
-    // Which register can hold a 128-bit long double depends on the ABI: FPRs
-    // for IBM double-double, a VSX register for IEEE 128-bit. Clang accepts
-    // neither in all cases, hence the memory fallback.
-    __asm__ __volatile__ ("" : "+wa,d,m"(r_));
+    // FPRs for IBM double-double, a VSX register for IEEE 128-bit. A single
+    // alternative, as GCC rejects a "+" operand with several when the value
+    // is a constant.
+    __asm__ __volatile__ ("" : "+wadm"(r_));
 #endif
     return r_;
   }
