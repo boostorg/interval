@@ -94,7 +94,9 @@ jobs:
           - { compiler: clang-20,  cxxstd: "11,14,17,20,23,2c", os: ubuntu-latest, container: "ubuntu:25.04" }
           - { compiler: clang-21,  cxxstd: "11,14,17,20,23,2c", os: ubuntu-latest, container: "ubuntu:26.04" }
           - { compiler: clang-22,  cxxstd: "11,14,17,20,23,2c", os: ubuntu-latest, container: "ubuntu:26.04", self_contained_headers: "yes" }
-          - { compiler: icpx-2025, cxxstd: "11,14,17,20,23,2c", os: ubuntu-latest, container: "intel/oneapi-hpckit:2025.2.2-0-devel-ubuntu24.04" }
+          # b2 compiles release with -ipo but does not link with it
+          - { compiler: icpx-2025, cxxstd: "11,14,17,20,23,2c", os: ubuntu-latest, container: "intel/oneapi-hpckit:2025.2.2-0-devel-ubuntu24.04",
+              b2_flags: "linkflags=-ipo" }
           # libc++
           - { name: "Clang w/ sanitizers", sanitize: "yes", stdlib: "libc++",
               compiler: clang-12,  cxxstd: "11,14,17,20",       os: ubuntu-latest, container: "ubuntu:20.04" }
