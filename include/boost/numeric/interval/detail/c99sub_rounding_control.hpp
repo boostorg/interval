@@ -18,7 +18,11 @@ namespace numeric {
 namespace interval_lib {
 namespace detail {
 
-extern "C" { double rint(double); long double rintl(long double); }
+extern "C" {
+  float rintf(float);
+  double rint(double);
+  long double rintl(long double);
+}
 
 struct c99_rounding_control
 {
@@ -31,8 +35,8 @@ struct c99_rounding_control
   static void to_nearest()  { set_rounding_mode(FE_TONEAREST);  }
   static void toward_zero() { set_rounding_mode(FE_TOWARDZERO); }
 
-  template<class T>
-  static T to_int(const T& r) { return rint(r); }
+  static float to_int(const float& r) { return rintf(r); }
+  static double to_int(const double& r) { return rint(r); }
   static long double to_int(const long double& r) { return rintl(r); }
 };
 
