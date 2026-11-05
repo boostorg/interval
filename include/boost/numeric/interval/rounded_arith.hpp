@@ -13,6 +13,8 @@
 #include <boost/numeric/interval/rounding.hpp>
 #include <boost/numeric/interval/detail/bugs.hpp>
 #include <boost/config/no_tr1/cmath.hpp>
+#include <boost/limits.hpp>
+#include <boost/type_traits/remove_cv.hpp>
 #if defined(_MSC_VER) && defined(_M_IX86) && _M_IX86_FP >= 1
 #  include <emmintrin.h>
 #endif
@@ -29,13 +31,43 @@ namespace detail {
 // operand afresh after the mode change makes each evaluation depend on a
 // value the compiler cannot reuse. Used by the rounded_arith_std primitives
 // and the sqrt bodies below.
-template<class T> inline T reload_operand(const T& x) { return x; }
+template<bool> struct reload_tag {};
+template<class T> inline T reload_operand(const T& x, reload_tag<false>)
+{ return x; }
+// Integers too: their conversion to T rounds in the current mode.
+template<class T> inline T reload_operand(const T& x, reload_tag<true>)
+{
+#if defined(__GNUC__)
+  T r_ = x;
+  __asm__ __volatile__ ("" : "+r"(r_));
+  return r_;
+#else
+  return x;
+#endif
+}
+template<class T> inline typename boost::remove_cv<T>::type
+reload_operand(const T& x)
+{
+  typedef typename boost::remove_cv<T>::type U;
+  U y = x;
+  return reload_operand(y, reload_tag<std::numeric_limits<U>::is_integer>());
+}
 inline float reload_operand(const float& x)
 { volatile float v = x; return v; }
 inline double reload_operand(const double& x)
 { volatile double v = x; return v; }
 inline long double reload_operand(const long double& x)
 { volatile long double v = x; return v; }
+
+// How rounded_arith_opp::conv_down converts an integer U to T: 1 when every
+// U is exact in T, 2 otherwise (-v would overflow or wrap). 0: not an integer.
+template<class T, class U> struct conv_kind {
+  typedef std::numeric_limits<T> lt;
+  typedef std::numeric_limits<typename boost::remove_cv<U>::type> lu;
+  static const int value = !lu::is_integer ? 0
+    : lt::is_specialized && lt::radix == 2 && lu::digits <= lt::digits ? 1 : 2;
+};
+template<int K> struct conv_tag {};
 
 // Square root in the current rounding mode.  The sqrt of the 32-bit
 // Microsoft runtime rounds to nearest whatever the mode, so use the square
@@ -161,7 +193,14 @@ struct rounded_arith_opp: Rounding {
     return r
 # define BOOST_UP(EXPR) return this->force_rounding(EXPR)
 # define BOOST_UP_NEG(EXPR) return -this->force_rounding(EXPR)
-  template<class U> T conv_down(U const &v) { BOOST_UP_NEG(-v); }
+  template<class U> T conv_down(U const &v)
+  { return conv_down(v, detail::conv_tag<detail::conv_kind<T, U>::value>()); }
+  template<class U> T conv_down(U const &v, detail::conv_tag<0>)
+  { BOOST_UP_NEG(-v); }
+  template<class U> T conv_down(U const &v, detail::conv_tag<1>)
+  { return static_cast<T>(v); }
+  template<class U> T conv_down(U const &v, detail::conv_tag<2>)
+  { BOOST_DN(detail::reload_operand(v)); }
   template<class U> T conv_up  (U const &v) { BOOST_UP(v); }
   T add_down(const T& x, const T& y) { BOOST_UP_NEG((-x) - y); }
   T sub_down(const T& x, const T& y) { BOOST_UP_NEG(y - x); }

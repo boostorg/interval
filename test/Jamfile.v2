@@ -57,6 +57,7 @@ if [ os.environ BOOST_NUMERIC_INTERVAL_TEST_SELF_CONTAINED_HEADERS ]
     $(self_contained_tests)
 
     [ run add.cpp      ]
+    [ run conv_integer.cpp ]
     [ run converting_ctor.cpp ]
     [ compile converting_ctor_fail.cpp ]
     [ compile-fail converting_ctor_fail.cpp : <define>BOOST_NUMERIC_INTERVAL_TEST_FAIL=1 : converting_ctor_fail_1 ]
