@@ -77,6 +77,7 @@ struct sparc_rounding_control
 extern "C" {
   float rintf(float);
   double rint(double);
+  long double rintl(long double);
 }
 
 template<>
@@ -100,7 +101,7 @@ struct rounding_control<long double>:
   detail::sparc_rounding_control
 {
   static const long double& force_rounding(const long double& x) { return x; }
-  static long double to_int(const long double& x) { return rint(x); }
+  static long double to_int(const long double& x) { return rintl(x); }
 };
 
 } // namespace interval_lib
