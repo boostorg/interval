@@ -204,8 +204,8 @@ struct rounded_arith_opp: Rounding {
   template<class U> T conv_down(U const &v, detail::conv_tag<2>)
   {
     typedef typename boost::remove_cv<U>::type V;
-    if (v == (std::numeric_limits<V>::min)())
-      return static_cast<T>(v);  // -2^n: exact
+    if (v == (std::numeric_limits<V>::min)())  // -v would overflow
+      return conv_down(v, detail::conv_tag<3>());
     BOOST_UP_NEG(-v);
   }
   template<class U> T conv_down(U const &v, detail::conv_tag<3>)
