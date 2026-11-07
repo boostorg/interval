@@ -457,6 +457,13 @@ template &lt;&gt; struct rounded_math&lt;long double&gt; : save_state&lt;rounded
   with the same rounding mode. Generally, the cost of the mode switching is
   worse than the cost of the sign changes.</p>
 
+  <p>The unary minus of an integer is not always exact: it wraps for
+  unsigned types and overflows at the minimum of signed types. So
+  <code>rounded_arith_opp::conv_down</code> converts an integer directly
+  when the base type holds all its values exactly, uses the opposite trick
+  for the other signed values, and switches the rounding mode only for
+  unsigned types and the minimum of signed types.</p>
+
   <h4>Speeding up consecutive operations</h4>
 
   <p>The interval addition is not the only operation; most of the interval
