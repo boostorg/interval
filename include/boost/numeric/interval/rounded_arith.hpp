@@ -60,12 +60,14 @@ inline long double reload_operand(const long double& x)
 { volatile long double v = x; return v; }
 
 // How rounded_arith_opp::conv_down converts an integer U to T: 1 when every
-// U is exact in T, 2 otherwise (-v would overflow or wrap). 0: not an integer.
+// U is exact in T, else 2 if signed (-v overflows only at the minimum) and 3
+// if unsigned (-v wraps). 0: not an integer.
 template<class T, class U> struct conv_kind {
   typedef std::numeric_limits<T> lt;
   typedef std::numeric_limits<typename boost::remove_cv<U>::type> lu;
   static const int value = !lu::is_integer ? 0
-    : lt::is_specialized && lt::radix == 2 && lu::digits <= lt::digits ? 1 : 2;
+    : lt::is_specialized && lt::radix == 2 && lu::digits <= lt::digits ? 1
+    : lu::is_signed ? 2 : 3;
 };
 template<int K> struct conv_tag {};
 
@@ -200,6 +202,13 @@ struct rounded_arith_opp: Rounding {
   template<class U> T conv_down(U const &v, detail::conv_tag<1>)
   { return static_cast<T>(v); }
   template<class U> T conv_down(U const &v, detail::conv_tag<2>)
+  {
+    typedef typename boost::remove_cv<U>::type V;
+    if (v == (std::numeric_limits<V>::min)())
+      return static_cast<T>(v);  // -2^n: exact
+    BOOST_UP_NEG(-v);
+  }
+  template<class U> T conv_down(U const &v, detail::conv_tag<3>)
   { BOOST_DN(detail::reload_operand(v)); }
   template<class U> T conv_up  (U const &v) { BOOST_UP(v); }
   T add_down(const T& x, const T& y) { BOOST_UP_NEG((-x) - y); }

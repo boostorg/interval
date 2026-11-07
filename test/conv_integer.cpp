@@ -28,7 +28,8 @@ template<class T> struct std_policy {
 template<class I, class U>
 void check(const char* name, U v, double lo, double hi)
 {
-  volatile U w = v;  // not folded at build time
+  volatile U wv = v;  // not folded at build time
+  U w = wv;           // plain copy: lets g++ merge conversions if it can
   I a(w), b(w, w), c;
   c = w;
   if (!(a.lower() == lo && a.upper() == hi))
