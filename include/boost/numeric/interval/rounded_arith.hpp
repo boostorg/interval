@@ -14,6 +14,7 @@
 #include <boost/numeric/interval/detail/bugs.hpp>
 #include <boost/config/no_tr1/cmath.hpp>
 #include <boost/limits.hpp>
+#include <boost/type_traits/integral_constant.hpp>
 #include <boost/type_traits/remove_cv.hpp>
 #if defined(_MSC_VER) && defined(_M_IX86) && _M_IX86_FP >= 1
 #  include <emmintrin.h>
@@ -31,15 +32,15 @@ namespace detail {
 // operand afresh after the mode change makes each evaluation depend on a
 // value the compiler cannot reuse. Used by the rounded_arith_std primitives
 // and the sqrt bodies below.
-template<bool> struct reload_tag {};
-template<class T> inline T reload_operand(const T& x, reload_tag<false>)
+template<class T> inline T reload_operand(const T& x, boost::false_type)
 { return x; }
-// Integers too: their conversion to T rounds in the current mode.
-template<class T> inline T reload_operand(const T& x, reload_tag<true>)
+// Integers too: their conversion to T rounds in the current mode. The
+// "memory" clobber keeps the conversion after the mode change.
+template<class T> inline T reload_operand(const T& x, boost::true_type)
 {
 #if defined(__GNUC__)
   T r_ = x;
-  __asm__ __volatile__ ("" : "+r"(r_));
+  __asm__ __volatile__ ("" : "+r"(r_) : : "memory");
   return r_;
 #else
   return x;
@@ -50,7 +51,8 @@ reload_operand(const T& x)
 {
   typedef typename boost::remove_cv<T>::type U;
   U y = x;
-  return reload_operand(y, reload_tag<std::numeric_limits<U>::is_integer>());
+  return reload_operand(y, boost::integral_constant<bool,
+    std::numeric_limits<U>::is_integer>());
 }
 inline float reload_operand(const float& x)
 { volatile float v = x; return v; }
@@ -69,7 +71,6 @@ template<class T, class U> struct conv_kind {
     : lt::is_specialized && lt::radix == 2 && lu::digits <= lt::digits ? 1
     : lu::is_signed ? 2 : 3;
 };
-template<int K> struct conv_tag {};
 
 // Square root in the current rounding mode.  The sqrt of the 32-bit
 // Microsoft runtime rounds to nearest whatever the mode, so use the square
@@ -196,19 +197,20 @@ struct rounded_arith_opp: Rounding {
 # define BOOST_UP(EXPR) return this->force_rounding(EXPR)
 # define BOOST_UP_NEG(EXPR) return -this->force_rounding(EXPR)
   template<class U> T conv_down(U const &v)
-  { return conv_down(v, detail::conv_tag<detail::conv_kind<T, U>::value>()); }
-  template<class U> T conv_down(U const &v, detail::conv_tag<0>)
+  { return conv_down(v,
+      boost::integral_constant<int, detail::conv_kind<T, U>::value>()); }
+  template<class U> T conv_down(U const &v, boost::integral_constant<int, 0>)
   { BOOST_UP_NEG(-v); }
-  template<class U> T conv_down(U const &v, detail::conv_tag<1>)
+  template<class U> T conv_down(U const &v, boost::integral_constant<int, 1>)
   { return static_cast<T>(v); }
-  template<class U> T conv_down(U const &v, detail::conv_tag<2>)
+  template<class U> T conv_down(U const &v, boost::integral_constant<int, 2>)
   {
     typedef typename boost::remove_cv<U>::type V;
     if (v == (std::numeric_limits<V>::min)())  // -v would overflow
-      return conv_down(v, detail::conv_tag<3>());
+      return conv_down(v, boost::integral_constant<int, 3>());
     BOOST_UP_NEG(-v);
   }
-  template<class U> T conv_down(U const &v, detail::conv_tag<3>)
+  template<class U> T conv_down(U const &v, boost::integral_constant<int, 3>)
   { BOOST_DN(detail::reload_operand(v)); }
   template<class U> T conv_up  (U const &v) { BOOST_UP(v); }
   T add_down(const T& x, const T& y) { BOOST_UP_NEG((-x) - y); }
