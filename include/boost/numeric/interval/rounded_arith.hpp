@@ -61,16 +61,18 @@ inline double reload_operand(const double& x)
 inline long double reload_operand(const long double& x)
 { volatile long double v = x; return v; }
 
-// How rounded_arith_opp::conv_down converts an integer U to T: 1 when every
-// U is exact in T, else 2 if signed (-v overflows only at the minimum) and 3
-// if unsigned (-v wraps). 0: not an integer.
+// How rounded_arith_opp::conv_down converts U to T.  For a signed U, -v
+// overflows only at the minimum; for an unsigned U, -v wraps.
+enum conv_kinds { conv_not_integer, conv_exact, conv_signed, conv_unsigned };
 template<class T, class U> struct conv_kind {
   typedef std::numeric_limits<T> lt;
   typedef std::numeric_limits<typename boost::remove_cv<U>::type> lu;
-  static const int value = !lu::is_integer ? 0
-    : lt::is_specialized && lt::radix == 2 && lu::digits <= lt::digits ? 1
-    : lu::is_signed ? 2 : 3;
+  static const conv_kinds value = !lu::is_integer ? conv_not_integer
+    : lt::is_specialized && lt::radix == 2 && lu::digits <= lt::digits ? conv_exact
+    : lu::is_signed ? conv_signed : conv_unsigned;
 };
+template<conv_kinds K> struct conv_tag
+  : boost::integral_constant<conv_kinds, K> {};
 
 // Square root in the current rounding mode.  The sqrt of the 32-bit
 // Microsoft runtime rounds to nearest whatever the mode, so use the square
@@ -197,20 +199,19 @@ struct rounded_arith_opp: Rounding {
 # define BOOST_UP(EXPR) return this->force_rounding(EXPR)
 # define BOOST_UP_NEG(EXPR) return -this->force_rounding(EXPR)
   template<class U> T conv_down(U const &v)
-  { return conv_down(v,
-      boost::integral_constant<int, detail::conv_kind<T, U>::value>()); }
-  template<class U> T conv_down(U const &v, boost::integral_constant<int, 0>)
+  { return conv_down(v, detail::conv_tag<detail::conv_kind<T, U>::value>()); }
+  template<class U> T conv_down(U const &v, detail::conv_tag<detail::conv_not_integer>)
   { BOOST_UP_NEG(-v); }
-  template<class U> T conv_down(U const &v, boost::integral_constant<int, 1>)
+  template<class U> T conv_down(U const &v, detail::conv_tag<detail::conv_exact>)
   { return static_cast<T>(v); }
-  template<class U> T conv_down(U const &v, boost::integral_constant<int, 2>)
+  template<class U> T conv_down(U const &v, detail::conv_tag<detail::conv_signed>)
   {
     typedef typename boost::remove_cv<U>::type V;
     if (v == (std::numeric_limits<V>::min)())  // -v would overflow
-      return conv_down(v, boost::integral_constant<int, 3>());
+      return conv_down(v, detail::conv_tag<detail::conv_unsigned>());
     BOOST_UP_NEG(-v);
   }
-  template<class U> T conv_down(U const &v, boost::integral_constant<int, 3>)
+  template<class U> T conv_down(U const &v, detail::conv_tag<detail::conv_unsigned>)
   { BOOST_DN(detail::reload_operand(v)); }
   template<class U> T conv_up  (U const &v) { BOOST_UP(v); }
   T add_down(const T& x, const T& y) { BOOST_UP_NEG((-x) - y); }
