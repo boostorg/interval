@@ -61,6 +61,70 @@ void test_double()
 #endif
 }
 
+#if defined(BOOST_HAS_LONG_LONG)
+// User-defined integers shaped like Boost.Multiprecision: two words with a
+// user copy, so not held in a register; smint is unbounded, so min() ==
+// max() == 0; umint has no unary minus.
+typedef boost::long_long_type ll;
+typedef boost::ulong_long_type ull;
+struct smint {
+  ll val, unused;
+  explicit smint(ll v): val(v), unused(0) {}
+  smint(const smint& o): val(o.val), unused(0) {}
+  smint operator-() const { return smint(-val); }
+  operator double() const { return static_cast<double>(val); }
+};
+inline bool operator==(const smint& a, const smint& b)
+{ return a.val == b.val; }
+inline bool operator<(const smint& a, const smint& b)
+{ return a.val < b.val; }
+struct umint {
+  ull mag, unused;
+  explicit umint(ull m): mag(m), unused(0) {}
+  umint(const umint& o): mag(o.mag), unused(0) {}
+  operator double() const { return static_cast<double>(mag); }
+};
+
+namespace std {
+template<> struct numeric_limits<smint>: numeric_limits<int> {
+  BOOST_STATIC_CONSTANT(bool, is_bounded = false);
+  BOOST_STATIC_CONSTANT(int, digits = INT_MAX);
+  static smint (min)() { return smint(0); }
+  static smint (max)() { return smint(0); }
+};
+template<> struct numeric_limits<umint>: numeric_limits<ull> {
+  static umint (min)() { return umint(0); }
+  static umint (max)() { return umint(~static_cast<ull>(0)); }
+};
+}
+
+template<class I, class U>
+void check_udt(const char* name, U v, double lo, double hi)
+{
+  I a(v), b(v, v), c;
+  c = v;
+  if (!(a.lower() == lo && a.upper() == hi))
+    std::printf("%s: [%.17g, %.17g], expected [%.17g, %.17g]\n",
+                name, (double)a.lower(), (double)a.upper(), lo, hi);
+  BOOST_TEST(a.lower() == lo && a.upper() == hi);
+  BOOST_TEST(b.lower() == lo && b.upper() == hi);
+  BOOST_TEST(c.lower() == lo && c.upper() == hi);
+}
+
+template<class I>
+void test_udt()
+{
+  const double two53 = 9007199254740992.0;
+  volatile ll p53 = static_cast<ll>(1) << 53;  // not folded at build time
+  check_udt<I>("smint 0", smint(0), 0.0, 0.0);
+  check_udt<I>("smint 2^53+1", smint(p53 + 1), two53, two53 + 2);
+  check_udt<I>("smint -2^53-1", smint(-p53 - 1), -two53 - 2, -two53);
+  check_udt<I>("umint 0", umint(0), 0.0, 0.0);
+  check_udt<I>("umint 2^53+1", umint(static_cast<ull>(p53) + 1),
+               two53, two53 + 2);
+}
+#endif
+
 template<class I>
 void test_float()
 {
@@ -76,5 +140,9 @@ int main()
   test_double<std_policy<double>::type>();
   test_float<interval<float> >();
   test_float<std_policy<float>::type>();
+#if defined(BOOST_HAS_LONG_LONG)
+  test_udt<interval<double> >();
+  test_udt<std_policy<double>::type>();
+#endif
   return boost::report_errors();
 }

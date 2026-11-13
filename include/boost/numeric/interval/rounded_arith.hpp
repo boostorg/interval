@@ -35,12 +35,18 @@ namespace detail {
 template<class T> inline T reload_operand(const T& x, boost::false_type)
 { return x; }
 // Integers too: their conversion to T rounds in the current mode. The
-// "memory" clobber keeps the conversion after the mode change.
+// "memory" clobber keeps the conversion after the mode change; "m" admits
+// user-defined integers that cannot live in a register.
 template<class T> inline T reload_operand(const T& x, boost::true_type)
 {
-#if defined(__GNUC__)
+#if defined(__clang__)
   T r_ = x;
-  __asm__ __volatile__ ("" : "+r"(r_) : : "memory");
+  // Clang rejects "+rm" for a class wider than a register.
+  __asm__ __volatile__ ("" : "+m"(r_) : : "memory");
+  return r_;
+#elif defined(__GNUC__)
+  T r_ = x;
+  __asm__ __volatile__ ("" : "+rm"(r_) : : "memory");
   return r_;
 #else
   return x;
@@ -62,7 +68,8 @@ inline long double reload_operand(const long double& x)
 { volatile long double v = x; return v; }
 
 // How rounded_arith_opp::conv_down converts U to T.  For a signed U, -v
-// overflows only at the minimum; for an unsigned U, -v wraps.
+// overflows only at the minimum of a two's complement type; for an
+// unsigned U, -v wraps.
 enum conv_kinds { conv_not_integer, conv_exact, conv_signed, conv_unsigned };
 template<class T, class U> struct conv_kind {
   typedef std::numeric_limits<T> lt;
@@ -206,8 +213,10 @@ struct rounded_arith_opp: Rounding {
   { return static_cast<T>(v); }
   template<class U> T conv_down(U const &v, detail::conv_tag<detail::conv_signed>)
   {
-    typedef typename boost::remove_cv<U>::type V;
-    if (v == (std::numeric_limits<V>::min)())  // -v would overflow
+    typedef std::numeric_limits<typename boost::remove_cv<U>::type> lv;
+    // Only a bounded two's complement type overflows; min() and max() mean
+    // nothing when unbounded (cpp_int returns 0 for both).
+    if (lv::is_bounded && (lv::min)() < -(lv::max)() && v == (lv::min)())
       return conv_down(v, detail::conv_tag<detail::conv_unsigned>());
     BOOST_UP_NEG(-v);
   }
