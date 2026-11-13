@@ -35,12 +35,17 @@ namespace detail {
 template<class T> inline T reload_operand(const T& x, boost::false_type)
 { return x; }
 // Integers too: their conversion to T rounds in the current mode. The
-// "memory" clobber keeps it after the mode change; "m" also takes classes.
+// "memory" clobber keeps it after the mode change.
 template<class T> inline T reload_operand(const T& x, boost::true_type)
 {
 #if defined(__GNUC__)
   T r_ = x;
+#  if defined(__clang__) || __GNUC__ < 7
+  // These reject "+rm" for a class.
   __asm__ __volatile__ ("" : "+m"(r_) : : "memory");
+#  else
+  __asm__ __volatile__ ("" : "+rm"(r_) : : "memory");
+#  endif
   return r_;
 #else
   return x;

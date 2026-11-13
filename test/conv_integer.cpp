@@ -93,12 +93,13 @@ namespace std {
 template<> struct numeric_limits<smint>: numeric_limits<int> {
   BOOST_STATIC_CONSTANT(bool, is_bounded = false);
   BOOST_STATIC_CONSTANT(int, digits = INT_MAX);
-  static smint (min)() { return smint(0); }
-  static smint (max)() { return smint(0); }
+  static smint min BOOST_PREVENT_MACRO_SUBSTITUTION () { return smint(0); }
+  static smint max BOOST_PREVENT_MACRO_SUBSTITUTION () { return smint(0); }
 };
 template<> struct numeric_limits<umint>: numeric_limits<ull> {
-  static umint (min)() { return umint(0); }
-  static umint (max)() { return umint(~static_cast<ull>(0)); }
+  static umint min BOOST_PREVENT_MACRO_SUBSTITUTION () { return umint(0); }
+  static umint max BOOST_PREVENT_MACRO_SUBSTITUTION ()
+  { return umint(~static_cast<ull>(0)); }
 };
 }
 
