@@ -78,12 +78,16 @@ inline bool operator==(const smint& a, const smint& b)
 { return a.val == b.val; }
 inline bool operator<(const smint& a, const smint& b)
 { return a.val < b.val; }
+inline bool operator<=(const smint& a, const smint& b)
+{ return a.val <= b.val; }
 struct umint {
   ull mag, unused;
   explicit umint(ull m): mag(m), unused(0) {}
   umint(const umint& o): mag(o.mag), unused(0) {}
   operator double() const { return static_cast<double>(mag); }
 };
+inline bool operator<=(const umint& a, const umint& b)
+{ return a.mag <= b.mag; }
 
 namespace std {
 template<> struct numeric_limits<smint>: numeric_limits<int> {
