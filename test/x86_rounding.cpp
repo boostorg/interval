@@ -185,6 +185,23 @@ void test_subnormal() {
   BOOST_TEST(c.upper() > 1);
 }
 
+// to_int rounds in the mode just set, whichever unit it runs on.
+template<class T>
+void test_to_int() {
+  typedef boost::numeric::interval_lib::rounding_control<T> rc;
+  void (*const set_mode[4])() =
+    { &rc::to_nearest, &rc::downward, &rc::upward, &rc::toward_zero };
+  T const pos[4] = { 2, 2, 3, 2 }, neg[4] = { -2, -3, -2, -2 };
+  for (unsigned m = 0; m < 4; ++m) {
+    set_default();
+    set_mode[m]();
+    T const p = rc::to_int(runtime(T(2.5))), n = rc::to_int(runtime(T(-2.5)));
+    set_default();
+    BOOST_TEST_EQ(p, pos[m]);
+    BOOST_TEST_EQ(n, neg[m]);
+  }
+}
+
 char const* current = "";
 extern "C" void on_sigfpe(int) {
   std::fprintf(stderr, "SIGFPE in test_unmasked<%s>: inexact trapped\n", current);
@@ -219,6 +236,9 @@ int main() {
   test_subnormal<float>();
   test_subnormal<double>();
   test_subnormal<long double>();
+  test_to_int<float>();
+  test_to_int<double>();
+  test_to_int<long double>();
   std::signal(SIGFPE, on_sigfpe);
   test_unmasked<float>("float");
   test_unmasked<double>("double");
