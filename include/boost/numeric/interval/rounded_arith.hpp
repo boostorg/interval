@@ -13,6 +13,9 @@
 #include <boost/numeric/interval/rounding.hpp>
 #include <boost/numeric/interval/detail/bugs.hpp>
 #include <boost/config/no_tr1/cmath.hpp>
+#include <boost/limits.hpp>
+#include <boost/type_traits/integral_constant.hpp>
+#include <boost/type_traits/remove_cv.hpp>
 #if defined(_MSC_VER) && defined(_M_IX86) && _M_IX86_FP >= 1
 #  include <emmintrin.h>
 #endif
@@ -29,13 +32,53 @@ namespace detail {
 // operand afresh after the mode change makes each evaluation depend on a
 // value the compiler cannot reuse. Used by the rounded_arith_std primitives
 // and the sqrt bodies below.
-template<class T> inline T reload_operand(const T& x) { return x; }
+template<class T> inline T reload_operand(const T& x, boost::false_type)
+{ return x; }
+// Integers too: their conversion to T rounds in the current mode. The
+// "memory" clobber keeps it after the mode change.
+template<class T> inline T reload_operand(const T& x, boost::true_type)
+{
+#if defined(__GNUC__)
+  T r_ = x;
+#  if defined(__clang__) || __GNUC__ < 7
+  // These reject "+rm" for a class.
+  __asm__ __volatile__ ("" : "+m"(r_) : : "memory");
+#  else
+  __asm__ __volatile__ ("" : "+rm"(r_) : : "memory");
+#  endif
+  return r_;
+#else
+  return x;
+#endif
+}
+template<class T> inline typename boost::remove_cv<T>::type
+reload_operand(const T& x)
+{
+  typedef typename boost::remove_cv<T>::type U;
+  U y = x;
+  return reload_operand(y, boost::integral_constant<bool,
+    std::numeric_limits<U>::is_integer>());
+}
 inline float reload_operand(const float& x)
 { volatile float v = x; return v; }
 inline double reload_operand(const double& x)
 { volatile double v = x; return v; }
 inline long double reload_operand(const long double& x)
 { volatile long double v = x; return v; }
+
+// How rounded_arith_opp::conv_down converts U to T.  For a signed U, -v
+// overflows only at the minimum of a two's complement type; for an
+// unsigned U, -v wraps.
+enum conv_kinds { conv_not_integer, conv_exact, conv_signed, conv_unsigned };
+template<class T, class U> struct conv_kind {
+  typedef std::numeric_limits<T> lt;
+  typedef std::numeric_limits<typename boost::remove_cv<U>::type> lu;
+  static const conv_kinds value = !lu::is_integer ? conv_not_integer
+    : lt::is_specialized && lt::radix == 2 && lu::digits <= lt::digits ? conv_exact
+    : lu::is_signed ? conv_signed : conv_unsigned;
+};
+template<conv_kinds K> struct conv_tag
+  : boost::integral_constant<conv_kinds, K> {};
 
 // Square root in the current rounding mode.  The sqrt of the 32-bit
 // Microsoft runtime rounds to nearest whatever the mode, so use the square
@@ -161,7 +204,23 @@ struct rounded_arith_opp: Rounding {
     return r
 # define BOOST_UP(EXPR) return this->force_rounding(EXPR)
 # define BOOST_UP_NEG(EXPR) return -this->force_rounding(EXPR)
-  template<class U> T conv_down(U const &v) { BOOST_UP_NEG(-v); }
+  template<class U> T conv_down(U const &v)
+  { return conv_down(v, detail::conv_tag<detail::conv_kind<T, U>::value>()); }
+  template<class U> T conv_down(U const &v, detail::conv_tag<detail::conv_not_integer>)
+  { BOOST_UP_NEG(-v); }
+  template<class U> T conv_down(U const &v, detail::conv_tag<detail::conv_exact>)
+  { return static_cast<T>(v); }
+  template<class U> T conv_down(U const &v, detail::conv_tag<detail::conv_signed>)
+  {
+    typedef std::numeric_limits<typename boost::remove_cv<U>::type> lv;
+    // Only a bounded two's complement type overflows; min() and max() mean
+    // nothing when unbounded (cpp_int returns 0 for both).
+    if (lv::is_bounded && (lv::min)() < -(lv::max)() && v == (lv::min)())
+      return conv_down(v, detail::conv_tag<detail::conv_unsigned>());
+    BOOST_UP_NEG(-v);
+  }
+  template<class U> T conv_down(U const &v, detail::conv_tag<detail::conv_unsigned>)
+  { BOOST_DN(detail::reload_operand(v)); }
   template<class U> T conv_up  (U const &v) { BOOST_UP(v); }
   T add_down(const T& x, const T& y) { BOOST_UP_NEG((-x) - y); }
   T sub_down(const T& x, const T& y) { BOOST_UP_NEG(y - x); }
