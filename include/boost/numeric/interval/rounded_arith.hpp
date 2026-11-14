@@ -30,8 +30,8 @@ namespace detail {
 // not see a rounding-mode change as a dependency, so it may compute the same
 // expression once for both ends of an interval (GCC bug 34678); reading one
 // operand afresh after the mode change makes each evaluation depend on a
-// value the compiler cannot reuse. Used by the rounded_arith_std primitives
-// and the sqrt bodies below.
+// value the compiler cannot reuse. Used by the rounded_arith_std primitives,
+// the rounded_arith_opp conversions and the sqrt bodies below.
 template<class T> inline T reload_operand(const T& x, boost::false_type)
 { return x; }
 // Integers too: their conversion to T rounds in the current mode. The
@@ -207,7 +207,7 @@ struct rounded_arith_opp: Rounding {
   template<class U> T conv_down(U const &v)
   { return conv_down(v, detail::conv_tag<detail::conv_kind<T, U>::value>()); }
   template<class U> T conv_down(U const &v, detail::conv_tag<detail::conv_not_integer>)
-  { BOOST_UP_NEG(-v); }
+  { BOOST_UP_NEG(-detail::reload_operand(v)); }
   template<class U> T conv_down(U const &v, detail::conv_tag<detail::conv_exact>)
   { return static_cast<T>(v); }
   template<class U> T conv_down(U const &v, detail::conv_tag<detail::conv_signed>)
@@ -217,11 +217,12 @@ struct rounded_arith_opp: Rounding {
     // nothing when unbounded (cpp_int returns 0 for both).
     if (lv::is_bounded && (lv::min)() < -(lv::max)() && v == (lv::min)())
       return conv_down(v, detail::conv_tag<detail::conv_unsigned>());
-    BOOST_UP_NEG(-v);
+    BOOST_UP_NEG(-detail::reload_operand(v));
   }
   template<class U> T conv_down(U const &v, detail::conv_tag<detail::conv_unsigned>)
   { BOOST_DN(detail::reload_operand(v)); }
-  template<class U> T conv_up  (U const &v) { BOOST_UP(v); }
+  template<class U> T conv_up  (U const &v)
+  { BOOST_UP(detail::reload_operand(v)); }
   T add_down(const T& x, const T& y) { BOOST_UP_NEG((-x) - y); }
   T sub_down(const T& x, const T& y) { BOOST_UP_NEG(y - x); }
   T mul_down(const T& x, const T& y) { BOOST_UP_NEG(x * (-y)); }
