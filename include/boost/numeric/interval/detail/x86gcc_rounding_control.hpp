@@ -45,6 +45,20 @@ struct x86_rounding
   }
 };
 
+struct mxcsr_asm
+{
+  static unsigned sse_get()
+  {
+    unsigned r;
+    __asm__ __volatile__ ("stmxcsr %0" : "=m"(r));
+    return r;
+  }
+
+  static void sse_set(unsigned r)
+  { __asm__ __volatile__ ("ldmxcsr %0" : : "m"(r) : "memory"); }
+};
+typedef mxcsr_asm x86_mxcsr;
+
 } // namespace detail
 } // namespace interval_lib
 } // namespace numeric

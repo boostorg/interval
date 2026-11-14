@@ -49,6 +49,9 @@ struct x86_rounding
   static double to_int(const double& x) { return rint(x); }
 };
 
+// No SSE arithmetic.
+typedef mxcsr_none x86_mxcsr;
+
 } // namespace detail
 } // namespace interval_lib
 } // namespace numeric

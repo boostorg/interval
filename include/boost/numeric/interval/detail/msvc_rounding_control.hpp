@@ -16,6 +16,7 @@
 #endif
 
 #include <float.h>      // MSVC rounding control
+#include <xmmintrin.h>  // MXCSR
 
 // Although the function is called _control87, it seems to work for
 // other FPUs too, so it does not have to be changed to _controlfp.
@@ -104,6 +105,30 @@ struct x86_rounding
   }
   static double to_int(const double& x) { return rint(x); }
 };
+
+#if defined(_M_IX86)
+// Inline asm: clang-cl rejects the intrinsics under /arch:IA32.  MXCSR is
+// set there too, since _control87 reads it along with the x87 word.
+struct mxcsr_asm
+{
+  static unsigned sse_get()
+  {
+    unsigned r;
+    __asm { stmxcsr r }
+    return r;
+  }
+
+  static void sse_set(unsigned r) { __asm { ldmxcsr r } }
+};
+typedef mxcsr_asm x86_mxcsr;
+#else
+struct mxcsr_intrinsics
+{
+  static unsigned sse_get() { return _mm_getcsr(); }
+  static void sse_set(unsigned r) { _mm_setcsr(r); }
+};
+typedef mxcsr_intrinsics x86_mxcsr;
+#endif
 
 } // namespace detail
 } // namespace interval_lib

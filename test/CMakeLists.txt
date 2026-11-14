@@ -68,6 +68,16 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)")
   boost_test(TYPE run SOURCES rounding_mode.cpp)
 endif()
 
+# x86-only regression test; the second build puts float and double in the
+# SSE unit on 32-bit x86 (#23).
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|x86|i[3-6]86)$")
+  boost_test(TYPE run SOURCES x86_rounding.cpp)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT MSVC)
+    boost_test(TYPE run NAME x86_rounding_sse SOURCES x86_rounding.cpp
+      COMPILE_OPTIONS -msse2 -mfpmath=sse)
+  endif()
+endif()
+
 # MSVC-only regression test (b2: <build>no <toolset>msvc:<build>yes).
 if(MSVC)
   boost_test(TYPE run SOURCES msvc_x64_flags.cpp)
