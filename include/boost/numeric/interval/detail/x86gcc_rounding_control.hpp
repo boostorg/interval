@@ -45,6 +45,29 @@ struct x86_rounding
   }
 };
 
+struct x87_status_asm
+{
+  // Status bits 0-7: the flags, stack fault and error summary.
+  static unsigned short x87_status_get()
+  {
+    unsigned short s;
+    __asm__ __volatile__ ("fnstsw %0" : "=m"(s) : : "memory");
+    return s & 0xff;
+  }
+
+  // Loads the control word and status bits 0-7 together, so that no flag
+  // raised inside is pending while mode unmasks it (it would trap).
+  static void x87_restore(const x86_rounding::rounding_mode& mode, unsigned short s)
+  {
+    struct { unsigned short w[14]; } env;  // GCC < 4.8 rejects an array "m"
+    __asm__ __volatile__ ("fnstenv %0" : "=m"(env));
+    env.w[0] = mode;
+    env.w[2] = (env.w[2] & ~0x80ff) | s;  // and clear the busy bit
+    __asm__ __volatile__ ("fldenv %0" : : "m"(env) : "memory");
+  }
+};
+typedef x87_status_asm x86_x87_status;
+
 struct mxcsr_asm
 {
   static unsigned sse_get()

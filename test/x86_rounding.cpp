@@ -1,7 +1,8 @@
 /* Boost test/x86_rounding.cpp
  * x86 rounding control sets everything in the unit that computes T: the
  * rounding mode, all exceptions masked, FTZ/DAZ off and, on x87, extended
- * precision (#23, #35).  The caller's control state comes back on exit.
+ * precision (#23, #35).  The caller's state, flags included, comes back
+ * exactly on exit: flags raised inside are dropped.
  *
  * Copyright 2026 Sayan Samanta
  *
@@ -20,6 +21,9 @@ int main() { return 0; } // x86 only
 
 #else
 
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
 #if !defined(__GNUC__) && !defined(__clang__)
 #  include <xmmintrin.h>
 #endif
@@ -144,14 +148,24 @@ void test_state() {
     BOOST_TEST_EQ(out_flags, 0x01u);
   }
 
-  // Interval arithmetic: rounded outward, the caller's control comes back.
+  // Interval arithmetic: inexact raised inside is dropped, the caller's
+  // invalid flag stays.
   typedef boost::numeric::interval<T> I;
   enter_user<T>(0);
   I q = I(runtime(T(1))) / I(runtime(T(3)));
-  unsigned const ctl = control<T>();
+  unsigned const ctl = control<T>(), fl = flags<T>();
   set_default();
   BOOST_TEST(q.lower() < q.upper());
   BOOST_TEST_EQ(ctl, user_control<T>(0));
+  BOOST_TEST_EQ(fl, 0x01u);
+
+  // The same from a caller with no flags raised.
+  set_default();
+  I r = I(runtime(T(1))) / I(runtime(T(3)));
+  unsigned const fl0 = flags<T>();
+  set_default();
+  BOOST_TEST(r.lower() < r.upper());
+  BOOST_TEST_EQ(fl0, 0u);
 }
 
 // FTZ/DAZ in the caller's state must not reach interval arithmetic.
@@ -171,6 +185,31 @@ void test_subnormal() {
   BOOST_TEST(c.upper() > 1);
 }
 
+char const* current = "";
+extern "C" void on_sigfpe(int) {
+  std::fprintf(stderr, "SIGFPE in test_unmasked<%s>: inexact trapped\n", current);
+  std::abort();
+}
+
+// Inexact unmasked by the caller: no trap inside, none afterwards in the
+// caller's code, and the inexact flag is not handed back.  Runs last, since
+// a failure aborts.
+template<class T>
+void test_unmasked(char const* name) {
+  typedef boost::numeric::interval<T> I;
+  current = name;
+  enter_user<T>(0x20);
+  I q = I(runtime(T(1))) / I(runtime(T(3)));
+  volatile T two = runtime(T(2));
+  volatile T four = two + two;  // exact; traps on x87 if inexact is pending
+  (void)four;
+  unsigned const ctl = control<T>(), fl = flags<T>();
+  set_default();
+  BOOST_TEST(q.lower() < q.upper());
+  BOOST_TEST_EQ(ctl, user_control<T>(0x20));
+  BOOST_TEST_EQ(fl, 0x01u);
+}
+
 } // namespace
 
 int main() {
@@ -180,6 +219,10 @@ int main() {
   test_subnormal<float>();
   test_subnormal<double>();
   test_subnormal<long double>();
+  std::signal(SIGFPE, on_sigfpe);
+  test_unmasked<float>("float");
+  test_unmasked<double>("double");
+  test_unmasked<long double>("long double");
   return boost::report_errors();
 }
 

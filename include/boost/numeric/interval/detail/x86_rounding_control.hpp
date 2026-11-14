@@ -11,12 +11,20 @@
 #ifndef BOOST_NUMERIC_INTERVAL_DETAIL_X86_ROUNDING_CONTROL_HPP
 #define BOOST_NUMERIC_INTERVAL_DETAIL_X86_ROUNDING_CONTROL_HPP
 
-// Shared by the platform headers below, each of which names its MXCSR access
-// x86_mxcsr.
+// Shared by the platform headers below, each of which names its x87 status
+// access x86_x87_status and its MXCSR access x86_mxcsr.
 namespace boost {
 namespace numeric {
 namespace interval_lib {
 namespace detail {
+
+// For units without x87 flag handling: restoring sets the control word only.
+template<class B> struct x87_status_none
+{
+  static unsigned short x87_status_get() { return 0; }
+  static void x87_restore(const typename B::rounding_mode mode, unsigned short)
+  { B::set_rounding_mode(mode); }
+};
 
 // For targets without SSE arithmetic.
 struct mxcsr_none
@@ -65,25 +73,28 @@ struct fpu_rounding_modes
 // hardware default is 0x037f (0x1000 only has a meaning on 287)
 static const fpu_rounding_modes rnd_mode = { 0x137f, 0x177f, 0x1b7f, 0x1f7f };
 
-// Sets the x87 unit and MXCSR: every exception masked, FTZ/DAZ off.  MXCSR
-// is written last, since _control87 changes it.
-struct x86_rounding_control: x86_rounding, x86_mxcsr
+// Sets the x87 unit and MXCSR: every exception masked, FTZ/DAZ off.  Restoring
+// puts back the caller's state exactly, flags included: flags raised inside
+// are dropped.  MXCSR is written last, since _control87 changes it.
+struct x86_rounding_control: x86_rounding, x86_x87_status, x86_mxcsr
 {
   struct rounding_mode
   {
     x86_rounding::rounding_mode x87;
+    unsigned short x87_status;
     unsigned sse;
   };
 
   static void get_rounding_mode(rounding_mode& mode)
   {
     x86_rounding::get_rounding_mode(mode.x87);
+    mode.x87_status = x87_status_get();
     mode.sse = sse_get();
   }
 
   static void set_rounding_mode(const rounding_mode& mode)
   {
-    x86_rounding::set_rounding_mode(mode.x87);
+    x87_restore(mode.x87, mode.x87_status);
     sse_set(mode.sse);
   }
 

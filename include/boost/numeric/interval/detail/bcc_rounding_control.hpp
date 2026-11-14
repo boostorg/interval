@@ -49,7 +49,8 @@ struct x86_rounding
   static double to_int(const double& x) { return rint(x); }
 };
 
-// No SSE arithmetic.
+// No SSE arithmetic.  The x87 flags raised inside are handed back.
+typedef x87_status_none<x86_rounding> x86_x87_status;
 typedef mxcsr_none x86_mxcsr;
 
 } // namespace detail
