@@ -82,6 +82,7 @@ if [ os.environ BOOST_NUMERIC_INTERVAL_TEST_SELF_CONTAINED_HEADERS ]
     [ run x86_rounding.cpp : : : [ check-target-builds /boost/architecture//x86 : : <build>no ] ]
     # The same with float and double in the SSE unit on 32-bit x86 (#23).
     [ run x86_rounding.cpp : : : [ check-target-builds /boost/architecture//x86 : : <build>no ]
+        [ check-target-builds /boost/architecture//32 : : <build>no ]
         <toolset>gcc:<cxxflags>"-msse2 -mfpmath=sse"
         <toolset>clang:<cxxflags>"-msse2 -mfpmath=sse"
       : x86_rounding_sse ]

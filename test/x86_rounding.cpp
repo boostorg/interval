@@ -55,17 +55,10 @@ void set_x87cw(unsigned v) {
   __asm__ __volatile__ ("fldcw %0" : : "m"(r) : "memory");
 }
 void clear_x87() { __asm__ __volatile__ ("fnclex" : : : "memory"); }
-#  define BOOST_INTERVAL_TEST_X87
-#else
-#  if defined(_M_IX86)
+#elif defined(_M_IX86)
 // Inline asm: clang-cl rejects the intrinsics under /arch:IA32.
 unsigned csr() { unsigned r; __asm { stmxcsr r } return r; }
 void set_csr(unsigned v) { __asm { ldmxcsr v } }
-#  else
-unsigned csr() { return _mm_getcsr(); }
-void set_csr(unsigned v) { _mm_setcsr(v); }
-#  endif
-#  if defined(_M_IX86)
 unsigned x87cw() { unsigned short r; __asm { fnstcw r } return r; }
 unsigned x87sw() { unsigned short r; __asm { fnstsw r } return r; }
 void set_x87cw(unsigned v) {
@@ -73,11 +66,10 @@ void set_x87cw(unsigned v) {
   __asm { fldcw r }
 }
 void clear_x87() { __asm { fnclex } }
-#    define BOOST_INTERVAL_TEST_X87
-#  endif
-#endif
-
-#if !defined(BOOST_INTERVAL_TEST_X87)
+#else
+// MSVC x64: no x87 arithmetic.
+unsigned csr() { return _mm_getcsr(); }
+void set_csr(unsigned v) { _mm_setcsr(v); }
 unsigned x87cw() { return 0; }
 unsigned x87sw() { return 0; }
 void set_x87cw(unsigned) {}
@@ -101,7 +93,7 @@ template<class T> unsigned user_control(unsigned unmask_pe)
 { return on_sse<T>::value ? csr_user & ~(unmask_pe << 7) : cw_user & ~unmask_pe & 0xf3f; }
 // Inside: mode m, everything masked, FTZ/DAZ off, x87 extended precision.
 template<class T> unsigned inside_control(unsigned m)
-{ return on_sse<T>::value ? 0x1f80 | m << 13 : 0x33f | m << 10; }
+{ return on_sse<T>::value ? csr_default | m << 13 : (cw_default & 0xf3f) | m << 10; }
 
 void set_default() { set_csr(csr_default); clear_x87(); set_x87cw(cw_default); }
 
@@ -126,17 +118,23 @@ void enter_user(unsigned unmask_pe) {
   set_x87cw(cw_user & ~unmask_pe);
 }
 
+// Mode m: 0 nearest, 1 downward, 2 upward, 3 toward zero.
+template<class T>
+void set_mode(unsigned m) {
+  typedef boost::numeric::interval_lib::rounding_control<T> rc;
+  void (*const f[4])() =
+    { &rc::to_nearest, &rc::downward, &rc::upward, &rc::toward_zero };
+  f[m]();
+}
+
 template<class T>
 void test_state() {
   typedef boost::numeric::interval_lib::rounding_control<T> rc;
-  void (*const set_mode[4])() =
-    { &rc::to_nearest, &rc::downward, &rc::upward, &rc::toward_zero };
-
   for (unsigned m = 0; m < 4; ++m) {
     enter_user<T>(0);
     typename rc::rounding_mode saved;
     rc::get_rounding_mode(saved);
-    set_mode[m]();
+    set_mode<T>(m);
     unsigned const in_ctl = control<T>(), in_flags = flags<T>();
     rc::set_rounding_mode(saved);
     unsigned const out_ctl = control<T>(), out_flags = flags<T>();
@@ -189,12 +187,10 @@ void test_subnormal() {
 template<class T>
 void test_to_int() {
   typedef boost::numeric::interval_lib::rounding_control<T> rc;
-  void (*const set_mode[4])() =
-    { &rc::to_nearest, &rc::downward, &rc::upward, &rc::toward_zero };
   T const pos[4] = { 2, 2, 3, 2 }, neg[4] = { -2, -3, -2, -2 };
   for (unsigned m = 0; m < 4; ++m) {
     set_default();
-    set_mode[m]();
+    set_mode<T>(m);
     T const p = rc::to_int(runtime(T(2.5))), n = rc::to_int(runtime(T(-2.5)));
     set_default();
     BOOST_TEST_EQ(p, pos[m]);
