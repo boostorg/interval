@@ -18,9 +18,7 @@
 #define BOOST_NUMERIC_INTERVAL_NO_HARDWARE
 
 // define appropriate specialization of rounding_control for built-in types
-#if defined(__x86_64__) && !defined(BOOST_NO_FENV_H)
-#  include <boost/numeric/interval/detail/c99_rounding_control.hpp>
-#elif defined(__i386__) || defined(_M_IX86) || defined(__BORLANDC__) && !defined(__clang__) || defined(_M_X64)
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64) || defined(__BORLANDC__) && !defined(__clang__)
 #  include <boost/numeric/interval/detail/x86_rounding_control.hpp>
 #elif defined(__i386) && defined(__SUNPRO_CC)
 #  include <boost/numeric/interval/detail/x86_rounding_control.hpp>

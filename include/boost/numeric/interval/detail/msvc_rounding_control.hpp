@@ -16,6 +16,7 @@
 #endif
 
 #include <float.h>      // MSVC rounding control
+#include <xmmintrin.h>  // MXCSR
 
 // Although the function is called _control87, it seems to work for
 // other FPUs too, so it does not have to be changed to _controlfp.
@@ -104,6 +105,56 @@ struct x86_rounding
   }
   static double to_int(const double& x) { return rint(x); }
 };
+
+#if defined(_M_IX86)
+struct x87_status_asm
+{
+  // Status bits 0-7: the flags, stack fault and error summary.
+  static unsigned short x87_status_get()
+  {
+    unsigned short s;
+    __asm { fnstsw s }
+    return s & 0xff;
+  }
+
+  // Loads the control word and status bits 0-7 together, so that no flag
+  // raised inside is pending while mode unmasks it (it would trap).
+  static void x87_restore(const x86_rounding::rounding_mode mode, unsigned short s)
+  {
+    unsigned short env[14];
+    __asm { fnstenv env }
+    env[0] = mode;
+    env[2] = (env[2] & ~0x80ff) | s;  // and clear the busy bit
+    __asm { fldenv env }
+  }
+};
+typedef x87_status_asm x86_x87_status;
+
+// Inline asm: clang-cl rejects the intrinsics under /arch:IA32.  MXCSR is
+// set there too, since _control87 reads it along with the x87 word.
+struct mxcsr_asm
+{
+  static unsigned sse_get()
+  {
+    unsigned r;
+    __asm { stmxcsr r }
+    return r;
+  }
+
+  static void sse_set(unsigned r) { __asm { ldmxcsr r } }
+};
+typedef mxcsr_asm x86_mxcsr;
+#else
+// No x87 arithmetic on x64.
+typedef x87_status_none<x86_rounding> x86_x87_status;
+
+struct mxcsr_intrinsics
+{
+  static unsigned sse_get() { return _mm_getcsr(); }
+  static void sse_set(unsigned r) { _mm_setcsr(r); }
+};
+typedef mxcsr_intrinsics x86_mxcsr;
+#endif
 
 } // namespace detail
 } // namespace interval_lib
