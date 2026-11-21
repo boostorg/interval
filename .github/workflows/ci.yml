@@ -495,6 +495,14 @@ jobs:
             if not %ERRORLEVEL% == 0 (type bootstrap.log & exit /b 1)
             b2 -d0 headers
 
+      # The windows-2025 image has the MSVC 14.52 STL, which requires Clang 22,
+      # but LLVM 20.  Remove once actions/runner-images#15368 is fixed.
+      - name: Install LLVM 22
+        if: matrix.toolset == 'clang-win'
+        run: |
+            choco upgrade llvm --version=22.1.8 -y --no-progress || exit /b 1
+            clang-cl --version
+
       - name: Run tests
         if: '!matrix.coverage'
         run: |
