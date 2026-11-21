@@ -27,6 +27,13 @@ namespace numeric {
 namespace interval_lib {
 namespace detail {
 
+// FSR rounding direction RD, bits 30-31.  The whole FSR is loaded from one
+// of these, so every other bit is 0: traps disabled, NS (flush to zero) off.
+static const unsigned int sparc_rd_to_nearest  = 0x00000000; // ties to even
+static const unsigned int sparc_rd_toward_zero = 0x40000000; // truncate
+static const unsigned int sparc_rd_upward      = 0x80000000; // toward +infinity
+static const unsigned int sparc_rd_downward    = 0xc0000000; // toward -infinity
+
 struct sparc_rounding_control
 {
   typedef unsigned int rounding_mode;
@@ -65,10 +72,10 @@ struct sparc_rounding_control
   static void to_nearest()  { set_rounding_mode(FP_RN); }
   static void toward_zero() { set_rounding_mode(FP_RZ); }
 #else
-  static void downward()    { set_rounding_mode(0xc0000000); }
-  static void upward()      { set_rounding_mode(0x80000000); }
-  static void to_nearest()  { set_rounding_mode(0x00000000); }
-  static void toward_zero() { set_rounding_mode(0x40000000); }
+  static void downward()    { set_rounding_mode(sparc_rd_downward);    }
+  static void upward()      { set_rounding_mode(sparc_rd_upward);      }
+  static void to_nearest()  { set_rounding_mode(sparc_rd_to_nearest);  }
+  static void toward_zero() { set_rounding_mode(sparc_rd_toward_zero); }
 #endif
 };
 
