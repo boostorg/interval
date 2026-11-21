@@ -26,10 +26,19 @@ namespace interval_lib {
 
 namespace detail {
 
-// exceptions masked, expected precision (the mask is 0x0300)
-static const fpu_rounding_modes rnd_mode_f = { 0x107f, 0x147f, 0x187f, 0x1c7f };
-static const fpu_rounding_modes rnd_mode_d = { 0x127f, 0x167f, 0x1a7f, 0x1e7f };
-static const fpu_rounding_modes rnd_mode_l = { 0x137f, 0x177f, 0x1b7f, 0x1f7f };
+// All exceptions masked; precision and rounding are added below.
+static const unsigned short x87_cw_base = x87_ic_affine | x87_reserved | x87_em_all;
+// The base | the precision of each type, so results need no rounding to memory.
+static const unsigned short x87_cw_f = x87_cw_base | x87_pc_24;
+static const unsigned short x87_cw_d = x87_cw_base | x87_pc_53;
+static const unsigned short x87_cw_l = x87_cw_base | x87_pc_64;
+// One control word per rounding mode: | the rounding field.
+static const fpu_rounding_modes rnd_mode_f = {
+  x87_cw_f | x87_rc_nearest, x87_cw_f | x87_rc_down, x87_cw_f | x87_rc_up, x87_cw_f | x87_rc_zero };
+static const fpu_rounding_modes rnd_mode_d = {
+  x87_cw_d | x87_rc_nearest, x87_cw_d | x87_rc_down, x87_cw_d | x87_rc_up, x87_cw_d | x87_rc_zero };
+static const fpu_rounding_modes rnd_mode_l = {
+  x87_cw_l | x87_rc_nearest, x87_cw_l | x87_rc_down, x87_cw_l | x87_rc_up, x87_cw_l | x87_rc_zero };
 
 } // namespace detail
 

@@ -11,6 +11,8 @@
 #ifndef BOOST_NUMERIC_INTERVAL_DETAIL_X86_ROUNDING_CONTROL_HPP
 #define BOOST_NUMERIC_INTERVAL_DETAIL_X86_ROUNDING_CONTROL_HPP
 
+#include <boost/numeric/interval/detail/x86_common.hpp>
+
 #if defined(__GNUC__) || defined(__BORLANDC__) && defined(__clang__)
 #  include <boost/numeric/interval/detail/x86gcc_rounding_control.hpp>
 #elif defined(__BORLANDC__)
@@ -42,9 +44,14 @@ struct fpu_rounding_modes
   unsigned short toward_zero;
 };
 
-// exceptions masked, extended precision
-// hardware default is 0x037f (0x1000 only has a meaning on 287)
-static const fpu_rounding_modes rnd_mode = { 0x137f, 0x177f, 0x1b7f, 0x1f7f };
+// Every field but rounding: all exceptions masked, extended precision.  The
+// hardware default 0x037f is the same without x87_ic_affine (287 only).
+static const unsigned short x87_cw_extended =
+  x87_ic_affine | x87_pc_64 | x87_reserved | x87_em_all;
+// One control word per rounding mode: the fields above | the rounding field.
+static const fpu_rounding_modes rnd_mode = {
+  x87_cw_extended | x87_rc_nearest, x87_cw_extended | x87_rc_down,
+  x87_cw_extended | x87_rc_up,      x87_cw_extended | x87_rc_zero };
 
 struct x86_rounding_control: x86_rounding
 {

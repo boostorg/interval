@@ -16,6 +16,7 @@
 #endif
 
 #include <float.h>      // MSVC rounding control
+#include <boost/numeric/interval/detail/x86_common.hpp>
 
 // Although the function is called _control87, it seems to work for
 // other FPUs too, so it does not have to be changed to _controlfp.
@@ -40,47 +41,47 @@ struct x86_rounding
 {
   static unsigned int hard2msvc(unsigned short m) {
     unsigned int n = 0;
-    if (m & 0x01) n |= _EM_INVALID;
-    if (m & 0x02) n |= _EM_DENORMAL;
-    if (m & 0x04) n |= _EM_ZERODIVIDE;
-    if (m & 0x08) n |= _EM_OVERFLOW;
-    if (m & 0x10) n |= _EM_UNDERFLOW;
-    if (m & 0x20) n |= _EM_INEXACT;
-    switch (m & 0x300) {
-    case 0x000: n |= _PC_24; break;
-    case 0x200: n |= _PC_53; break;
-    case 0x300: n |= _PC_64; break;
+    if (m & x87_em_invalid)    n |= _EM_INVALID;
+    if (m & x87_em_denormal)   n |= _EM_DENORMAL;
+    if (m & x87_em_zerodivide) n |= _EM_ZERODIVIDE;
+    if (m & x87_em_overflow)   n |= _EM_OVERFLOW;
+    if (m & x87_em_underflow)  n |= _EM_UNDERFLOW;
+    if (m & x87_em_inexact)    n |= _EM_INEXACT;
+    switch (m & x87_pc_mask) {
+    case x87_pc_24: n |= _PC_24; break;
+    case x87_pc_53: n |= _PC_53; break;
+    case x87_pc_64: n |= _PC_64; break;
     }
-    switch (m & 0xC00) {
-    case 0x000: n |= _RC_NEAR; break;
-    case 0x400: n |= _RC_DOWN; break;
-    case 0x800: n |= _RC_UP;   break;
-    case 0xC00: n |= _RC_CHOP; break;
+    switch (m & x87_rc_mask) {
+    case x87_rc_nearest: n |= _RC_NEAR; break;
+    case x87_rc_down:    n |= _RC_DOWN; break;
+    case x87_rc_up:      n |= _RC_UP;   break;
+    case x87_rc_zero:    n |= _RC_CHOP; break;
     }
-    if (m & 0x1000) n |= _IC_AFFINE; // only useful on 287
+    if (m & x87_ic_affine) n |= _IC_AFFINE; // only useful on 287
     return n;
   }
 
   static unsigned short msvc2hard(unsigned int n) {
     unsigned short m = 0;
-    if (n & _EM_INVALID)    m |= 0x01;
-    if (n & _EM_DENORMAL)   m |= 0x02;
-    if (n & _EM_ZERODIVIDE) m |= 0x04;
-    if (n & _EM_OVERFLOW)   m |= 0x08;
-    if (n & _EM_UNDERFLOW)  m |= 0x10;
-    if (n & _EM_INEXACT)    m |= 0x20;
+    if (n & _EM_INVALID)    m |= x87_em_invalid;
+    if (n & _EM_DENORMAL)   m |= x87_em_denormal;
+    if (n & _EM_ZERODIVIDE) m |= x87_em_zerodivide;
+    if (n & _EM_OVERFLOW)   m |= x87_em_overflow;
+    if (n & _EM_UNDERFLOW)  m |= x87_em_underflow;
+    if (n & _EM_INEXACT)    m |= x87_em_inexact;
     switch (n & _MCW_RC) {
-    case _RC_NEAR: m |= 0x000; break;
-    case _RC_DOWN: m |= 0x400; break;
-    case _RC_UP:   m |= 0x800; break;
-    case _RC_CHOP: m |= 0xC00; break;
+    case _RC_NEAR: m |= x87_rc_nearest; break;
+    case _RC_DOWN: m |= x87_rc_down;    break;
+    case _RC_UP:   m |= x87_rc_up;      break;
+    case _RC_CHOP: m |= x87_rc_zero;    break;
     }
     switch (n & _MCW_PC) {
-    case _PC_24: m |= 0x000; break;
-    case _PC_53: m |= 0x200; break;
-    case _PC_64: m |= 0x300; break;
+    case _PC_24: m |= x87_pc_24; break;
+    case _PC_53: m |= x87_pc_53; break;
+    case _PC_64: m |= x87_pc_64; break;
     }
-    if ((n & _MCW_IC) == _IC_AFFINE) m |= 0x1000;
+    if ((n & _MCW_IC) == _IC_AFFINE) m |= x87_ic_affine;
     return m;
   }
 

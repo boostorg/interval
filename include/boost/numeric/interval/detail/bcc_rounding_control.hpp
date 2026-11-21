@@ -20,6 +20,7 @@
 #endif
 
 #include <float.h>      // Borland C++ rounding control
+#include <boost/numeric/interval/detail/x86_common.hpp>
 
 namespace boost {
 namespace numeric {
@@ -45,7 +46,7 @@ struct x86_rounding
   static void get_rounding_mode(rounding_mode& mode)
   { mode = _control87(0, 0); }
   static void set_rounding_mode(const rounding_mode mode)
-  { _control87(mode, 0xffff); } 
+  { _control87(mode, x87_cw_all); } 
   static double to_int(const double& x) { return rint(x); }
 };
 
