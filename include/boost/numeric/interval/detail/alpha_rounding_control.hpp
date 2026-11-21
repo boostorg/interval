@@ -29,12 +29,22 @@ namespace detail {
     double dmode;
     } rounding_mode_struct;
 
-    // set bits 59-58 (DYN),
-    // clear all exception bits and disable overflow (51) and inexact exceptions (62)
-    static const rounding_mode_struct mode_upward      = { 0x4C08000000000000LL };
-    static const rounding_mode_struct mode_downward    = { 0x4408000000000000LL };
-    static const rounding_mode_struct mode_to_nearest  = { 0x4808000000000000LL };
-    static const rounding_mode_struct mode_toward_zero = { 0x4008000000000000LL };
+    // FPCR fields; each has its own bits, so an FPCR image is their |.
+    // Every bit not set here is 0: exception flags clear.
+    static const ::boost::long_long_type alpha_fpcr_ovfd = 0x0008000000000000LL; // bit 51: overflow does not trap
+    static const ::boost::long_long_type alpha_fpcr_ined = 0x4000000000000000LL; // bit 62: inexact does not trap
+    // Dynamic rounding mode DYN, bits 58-59.
+    static const ::boost::long_long_type alpha_dyn_toward_zero = 0x0000000000000000LL; // truncate
+    static const ::boost::long_long_type alpha_dyn_downward    = 0x0400000000000000LL; // toward -infinity
+    static const ::boost::long_long_type alpha_dyn_to_nearest  = 0x0800000000000000LL; // ties to even
+    static const ::boost::long_long_type alpha_dyn_upward      = 0x0C00000000000000LL; // toward +infinity
+    // Both traps disabled; each mode below is this | one DYN value.
+    static const ::boost::long_long_type alpha_fpcr_base = alpha_fpcr_ined | alpha_fpcr_ovfd;
+
+    static const rounding_mode_struct mode_upward      = { alpha_fpcr_base | alpha_dyn_upward };
+    static const rounding_mode_struct mode_downward    = { alpha_fpcr_base | alpha_dyn_downward };
+    static const rounding_mode_struct mode_to_nearest  = { alpha_fpcr_base | alpha_dyn_to_nearest };
+    static const rounding_mode_struct mode_toward_zero = { alpha_fpcr_base | alpha_dyn_toward_zero };
 
     struct alpha_rounding_control
     {

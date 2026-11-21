@@ -28,10 +28,21 @@ typedef union {
   double dmode;
 } rounding_mode_struct;
 
-static const rounding_mode_struct mode_upward      = { 0xFFF8000000000002ULL };
-static const rounding_mode_struct mode_downward    = { 0xFFF8000000000003ULL };
-static const rounding_mode_struct mode_to_nearest  = { 0xFFF8000000000000ULL };
-static const rounding_mode_struct mode_toward_zero = { 0xFFF8000000000001ULL };
+// mtfsf 255 loads the FPSCR from the low word of a double, so each mode is
+// a double image: ppc_fpscr_image | one RN value.  The image's low word is 0
+// (flags clear, traps disabled, NI off); its high word only makes the double
+// a quiet NaN.
+static const ::boost::ulong_long_type ppc_fpscr_image   = 0xFFF8000000000000ULL;
+// Rounding control RN, the two lowest FPSCR bits.
+static const ::boost::ulong_long_type ppc_rn_to_nearest  = 0x0; // ties to even
+static const ::boost::ulong_long_type ppc_rn_toward_zero = 0x1; // truncate
+static const ::boost::ulong_long_type ppc_rn_upward      = 0x2; // toward +infinity
+static const ::boost::ulong_long_type ppc_rn_downward    = 0x3; // toward -infinity
+
+static const rounding_mode_struct mode_upward      = { ppc_fpscr_image | ppc_rn_upward };
+static const rounding_mode_struct mode_downward    = { ppc_fpscr_image | ppc_rn_downward };
+static const rounding_mode_struct mode_to_nearest  = { ppc_fpscr_image | ppc_rn_to_nearest };
+static const rounding_mode_struct mode_toward_zero = { ppc_fpscr_image | ppc_rn_toward_zero };
 
 struct ppc_rounding_control
 {
